@@ -1,0 +1,22 @@
+.container {
+  width: 100%;
+  max-width: #{$container-width + $offset-side * 2};
+  padding-right: $offset-side-sm;
+  padding-left: $offset-side-sm;
+  margin-right: auto;
+  margin-left: auto;
+
+  &._relative {
+    position: relative;
+  }
+
+  @include media-md {
+    padding-right: $offset-side-md;
+    padding-left: $offset-side-md;
+  }
+
+  @include media-lg {
+    padding-right: $offset-side;
+    padding-left: $offset-side;
+  }
+}

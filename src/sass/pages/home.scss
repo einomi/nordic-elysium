@@ -1,0 +1,23 @@
+.page-home {
+  padding: 20px 0;
+
+  @include media-lg {
+    padding: 60px 0;
+  }
+
+  &__title {
+    margin-bottom: 60px;
+  }
+
+  &__button {
+    margin-bottom: 60px;
+  }
+
+  &__inline-image-example {
+    width: 150px;
+    height: 116px;
+    border-bottom: 1px solid white;
+    background-image: inline('../images/rubber-duck.png');
+    color: #000;
+  }
+}

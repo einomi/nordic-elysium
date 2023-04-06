@@ -1,0 +1,179 @@
+{% extends './_layouts/base.njk' %}
+
+{% from './components/button/button.njk' import button %}
+
+{% block title %}
+  frōntensō-11ty-starter
+{% endblock %}
+
+{% block content %}
+  <div class="page-home page">
+    <div class="container">
+      <img class="max-w-[320px] w-full mb-4"
+        src="{{ 'src/images/frontenso-11ty-starter.png'|inline }}"
+        alt="" />
+      <ul class="mb-10 text-sm lg:text-base font-bold rounded bg-black text-white p-4 pl-8 space-y-1 list-disc max-w-3xl">
+        <li>Component-based approach</li>
+        <li>Super-fast builds with Gulp and SCSS support</li>
+        <li>TailwindCSS with JIT</li>
+        <li>Linters included</li>
+        <li>Webpack config for most cases</li>
+        <li>Actively developed!</li>
+      </ul>
+      <p>
+        This is a production-ready component-based starter that features
+        Nunjucks, SCSS, TailwindCSS (with JIT compiler), Webpack, ESNext, and
+        live reloading.
+      </p>
+      <div class="mb-14">
+        <a href="https://github.com/einomi/frontenso-11ty-starter"
+          target="_blank"
+          class="text-blue-600 font-bold hover:opacity-80">
+          GitHub Documentation
+        </a>
+      </div>
+      <h3 class="text-lg font-semibold mb-4">
+        A UI component example (check out the code)
+      </h3>
+      {{
+        button({
+          className: 'page-home__button',
+          children: 'Buy something',
+          chevronRight: true
+        })
+      }}
+      {% include './components/some-component/some-component.njk' %}
+      <section class="mt-14">
+        <h3 class="text-lg font-semibold mb-5">
+          Image example 1. AVIF and WebP are generated using {{
+            '{ % image % }'
+          }} Nunjucks tag.
+        </h3>
+        {# not passing maxWidth here #}
+        <div class="max-w-xs">
+          {% image './src/images/cat.jpg',
+            {
+              alt: 'Cat',
+              class: 'example-image block max-w-full h-auto'
+            }
+          %}
+        </div>
+      </section>
+      <section class="mt-14">
+        <h3 class="text-lg font-semibold mb-5">
+          Image example 2. maxWidth=500 is passed. AVIF and WebP are also
+          generated.
+        </h3>
+        {# passing maxWidth=500 here #}
+        <div class="max-w-xs bg-red-100">
+          {% image './src/images/wolf.png',
+            {
+              alt: 'Wolf',
+              class: 'example-image block max-w-full h-auto'
+            },
+            500
+          %}
+        </div>
+      </section>
+      <section class="mt-14">
+        <h3 class="text-lg font-semibold mb-1 max-w-xl">
+          An image inlined in CSS example (compress such images manually!). Not
+          recommended for wide usage, see below.
+        </h3>
+        <h4 class="max-w-xl text-lg text-red-600 mb-6 font-bold tracking-wide">
+          <span class="uppercase">Attention!</span> Please use this feature with
+          caution as it may bloat the final CSS file. Inlining images could be a
+          good approach if the file is quite small, in other cases prefer `&#123;%
+          image %&#125;` tag.
+        </h4>
+        <div class="page-home__inline-image-example"></div>
+      </section>
+      <section class="mt-14">
+        <h3 class="text-lg font-semibold mb-5">
+          Vector image example (using SVG sprite)
+        </h3>
+        <svg class="text-black fill-current w-20 h-20">
+          <use xlink:href="#icon-logo-example"></use>
+        </svg>
+      </section>
+      <div class="flex items-center">
+        <div></div>
+        <div></div>
+      </div>
+      <section class="mt-14">
+        <h3 class="text-lg font-semibold mb-5">
+          Tailwind CSS Example
+        </h3>
+        <div class="px-4 py-4 rounded w-64 shadow shadow-md">
+          <h3 class="bold mb-2 text-blue-600 hover-default font-bold">
+            Some section
+          </h3>
+          <div class="flex">
+            <svg class="relative top-0.75 mr-2 w-5 h-5">
+              <use xlink:href="#icon-movies"></use>
+            </svg>
+            <div class="text-sm">
+              <div class="line -mb-0.75">
+                Movies
+              </div>
+              <div class="text-gray-600">
+                For cosy evenings
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="mt-14 space-y-3">
+        <h3 class="text-lg font-semibold">
+          Example of using `if` statement in a html attribute
+        </h3>
+        <div class="max-w-xl space-y-3">
+          <p>
+            This starter uses twig melody parser to format .njk files with
+            Prettier automatically on each commit. However, there is a known
+            issue when trying to use {{ '{% if %}' }} block in a html attribute.
+          </p>
+          <p>
+            For example, the following code would throw a syntax error during
+            the code formatting:
+          </p>
+          <p class="text-pink-600 text-[12px] block font-mono">
+            {{
+              '<p class="{% if someExpression %}some-class-name{% endif %}">Some paragraph</p>'
+            }}
+          </p>
+          <p>
+            To avoid it use {{ '{% set %}' }} wrapped in html comment (melody parser
+            ignore html comments by default) like this:
+          </p>
+          <p class="text-pink-600 text-[12px] block font-mono">
+            {{ '<!-- {% set someClass = "some-class" if true %} -->' }}
+          </p>
+          <p>
+            then you can use `someClass` in the markup like this.
+          </p>
+          <p class="text-pink-600 text-[12px] block font-mono">
+            {{ '<p class="{{ someClass }}">' }}
+          </p>
+          <p>
+            Use any other expression instead of `true` in
+            {{ '{% set %}' }} block. You can also use `else` if you need. This syntax
+            is called `if expression` in Nunjucks. It is similar to JavaScript ternary
+            or Python one-line if expression.
+          </p>
+          <!-- {% set someClass = "some-class" if true %} -->
+          <p class="{{ someClass }}">
+            For example, this text has html class attribute (check the code)
+            calculated using an `if` statement and `{{ '{% set %}' }}` block.
+          </p>
+          <p class="font-semibold">
+            NOTE. If you are still experiencing issues with formatting .njk
+            files, just remove `prettier-plugin-twig-nunjucks-melody` npm
+            package from your project and .njk files will not be formatted
+            anymore.
+          </p>
+        </div>
+      </section>
+    </div>
+  </div>
+{% endblock %}

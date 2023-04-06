@@ -1,0 +1,9 @@
+{% macro button(props) %}
+  <!-- {% set className = ' ' + props.className if props.className else '' %} -->
+  <button class="button{{ className }}">
+    {{ props.children }}
+    {% if props.chevronRight %}
+      <span class="button__chevron-right">&gt;</span>
+    {% endif %}
+  </button>
+{% endmacro %}

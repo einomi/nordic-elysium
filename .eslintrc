@@ -1,0 +1,10 @@
+{
+  "parser": "babel-eslint",
+  "env": {
+    "browser": true,
+    "es6": true,
+    "commonjs": true
+  },
+  "extends": ["plugin:sonarjs/recommended", "@frontenso/javascript"],
+  "plugins": ["sonarjs"]
+}
