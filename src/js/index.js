@@ -3,6 +3,7 @@ import gsap from 'gsap';
 
 import vertexShader from './shaders/vertex.glsl';
 import fragmentShader from './shaders/fragment.glsl';
+import bgFragmentShader from './shaders/bg-fragment.glsl';
 
 let elapsedTime = 0;
 
@@ -61,6 +62,36 @@ renderer.setPixelRatio(window.devicePixelRatio || 1);
 renderer.setSize(window.innerWidth, window.innerHeight);
 
 const clock = new THREE.Clock();
+
+// load mask texture
+const maskTexture = loader.load('/mask.png');
+
+// load texture scenery.jpg and set it as background of the scene, use shader material
+// eslint-disable-next-line sonarjs/prefer-object-literal
+const uniformsBackground = {
+  u_texture: { value: loader.load('/scenery.jpg') },
+  u_mask: { value: maskTexture },
+  u_time: { value: 0.0 },
+  u_resolution: { value: new THREE.Vector2() },
+  u_mouse: { value: { x: 0.0, y: 0.0 } },
+  u_duration: { value: 8.0 },
+};
+
+const materialBackground = new THREE.ShaderMaterial({
+  uniforms: uniformsBackground,
+  vertexShader,
+  fragmentShader: bgFragmentShader,
+  transparent: true,
+  side: THREE.FrontSide,
+});
+
+const geometryBackground = new THREE.PlaneGeometry(
+  window.innerWidth,
+  window.innerHeight
+);
+
+const planeBackground = new THREE.Mesh(geometryBackground, materialBackground);
+scene.add(planeBackground);
 
 const geometry = new THREE.PlaneGeometry(
   window.innerWidth / 1.5,
@@ -171,6 +202,7 @@ function animate() {
   elapsedTime += clock.getDelta();
 
   uniforms.u_time.value = elapsedTime;
+  uniformsBackground.u_time.value = elapsedTime;
 
   smokeElements.forEach((smokeElement) => {
     smokeElement.rotation.z = elapsedTime * 0.12;

@@ -3,6 +3,7 @@
 varying vec2 v_uv;
 uniform float u_time;
 uniform sampler2D u_texture;
+uniform sampler2D u_mask;
 
 float random(vec2 st) {
   return fract(sin(dot(st.xy, vec2(12.9898, 78.233))) * 43758.5453123);
@@ -62,28 +63,33 @@ float cnoise(vec2 P) {
 }
 
 void main() {
-  // set texture
+
+  // display texture as background cover
   vec2 uv = v_uv;
-
-  // make waves
-  float wave = sin(uv.y * 5.0 + u_time * 0.03) * 0.1;
-  uv.y += wave;
-//
-//  // wave x
-//  float waveX = sin(uv.x * 5.0 + u_time * 0.01) * 0.1;
-//  uv.x += waveX;
-
-  // add cloud distortion
-  float cloud = cnoise(uv * 0.1 + u_time * 0.01);
-  uv.x += cloud * 0.2;
-//  uv.y += cloud * 0.3;
-
-
-  // rotate using noise
-  float noise = cnoise(uv * 0.01 + u_time * 0.01);
-  uv = rotate(uv, noise * PI * 0.05, vec2(0.5, 0.5));
-
+  vec2 mid = vec2(0.5, 0.5);
   vec4 tex = texture2D(u_texture, uv);
+
+  // get mask
+  vec4 mask = texture2D(u_mask, uv);
+
+  // apply ray animation to the masked area of tex
+  if (mask.r == 0.0) {
+     float y = uv.y - sin(u_time * PI  )  * 0.01;
+
+
+    // get noise
+    float n = cnoise(vec2(uv.x * 10.0, y * 10.0)) * 0.01 * sin(u_time * PI * 2.0);
+    // move x left and right
+    float x = uv.x + n * 0.3;
+    // get new uv
+    vec2 newUv = vec2(x, y);
+    // get new tex
+    tex = texture2D(u_texture, newUv);
+  }
+
+
+
+
 
   gl_FragColor = vec4(tex);
 }
