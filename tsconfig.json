@@ -25,5 +25,6 @@
     "gulpfile.js",
     "gulp-tasks",
     "dist/"
-  ]
+  ],
+  "files": ["custom.d.ts"]
 }

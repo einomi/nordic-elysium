@@ -13,7 +13,7 @@ module.exports = {
     return acc;
   }, {}),
   output: {
-    filename: 'bundle.js',
+    filename: '[name].js',
     path: path.resolve(__dirname, 'dist/js'),
     publicPath: '/js',
   },
@@ -22,6 +22,10 @@ module.exports = {
       {
         test: /\.(js|jsx)$/,
         use: 'babel-loader',
+      },
+      {
+        test: /\.(glsl|vs|fs|vert|frag)$/,
+        type: 'asset/source',
       },
     ],
   },

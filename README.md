@@ -1,6 +1,10 @@
 ![frontenso-eleventy-starter](./src/images/frontenso-11ty-starter.png 'Title')</br>
 _by_ **[frontenso.com](https://frontenso.com)**
 
+# Nordic Elysium
+
+A tech demo written with WebGL and GSAP.
+
 # Nunjucks + SCSS + TailwindCSS(JIT) + ESNext starter based on 11ty and Gulp 💪
 
 This starter kit is ready for production and is built on a component-based structure, utilizing the power of Nunjucks, SCSS, and TailwindCSS (with a Just-in-Time compiler), Webpack, ESNext, and live reloading.
