@@ -11,12 +11,42 @@ const canvas = /** @type {HTMLCanvasElement} */ (
   document.querySelector('canvas.webgl')
 );
 
+const menuBackgroundOpacity = {
+  value: 0,
+};
+
 document.addEventListener('DOMContentLoaded', () => {
-  const listItems = document.querySelectorAll('[data-list-item]');
-  gsap.to(canvas, {
+  const titleEl = document.querySelector('[data-title]');
+
+  const titleSource = titleEl.querySelector('[data-source]');
+  const titleLetters = titleEl.querySelector('[data-letters]');
+
+  // break into letters, get text from source and put into letters element
+  const letters = titleSource.textContent.split('');
+  titleLetters.innerHTML = letters
+    .map((letter) => `<span>${letter}</span>`)
+    .join('');
+
+  // get spans
+  const spans = titleLetters.querySelectorAll('span');
+
+  gsap.set(titleLetters, { alpha: 1 });
+  gsap.set(spans, { alpha: 0 });
+
+  gsap.to(spans, {
     duration: 1.5,
-    autoAlpha: 1,
+    alpha: 1,
     ease: 'sine.out',
+    stagger: 0.05,
+    delay: 0.3,
+  });
+
+  const listItems = document.querySelectorAll('[data-list-item]');
+  gsap.to(menuBackgroundOpacity, {
+    duration: 1.5,
+    value: 1,
+    ease: 'sine.out',
+    delay: 0.3,
   });
 
   gsap.fromTo(
@@ -64,7 +94,7 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 const clock = new THREE.Clock();
 
 // load mask texture
-const maskTexture = loader.load('/mask.png');
+const maskTexture = loader.load('/mask2.png');
 
 // load texture scenery.jpg and set it as background of the scene, use shader material
 // eslint-disable-next-line sonarjs/prefer-object-literal
@@ -93,25 +123,26 @@ const geometryBackground = new THREE.PlaneGeometry(
 const planeBackground = new THREE.Mesh(geometryBackground, materialBackground);
 scene.add(planeBackground);
 
-const geometry = new THREE.PlaneGeometry(
+const menuGeometry = new THREE.PlaneGeometry(
   window.innerWidth / 1.5,
   window.innerHeight + 100
 );
 
 // change position of plane to right side
-geometry.translate(window.innerWidth / 5, 0, 0);
+menuGeometry.translate(window.innerWidth / 5, 0, 0);
 
 // eslint-disable-next-line sonarjs/prefer-object-literal
-const uniforms = {
+const menuUniforms = {
   u_texture: { value: loader.load('/menu.png') },
   u_time: { value: 0.0 },
   u_resolution: { value: new THREE.Vector2() },
   u_mouse: { value: { x: 0.0, y: 0.0 } },
   u_duration: { value: 8.0 },
+  u_opacity: menuBackgroundOpacity,
 };
 
 const material = new THREE.ShaderMaterial({
-  uniforms,
+  uniforms: menuUniforms,
   vertexShader,
   fragmentShader,
   transparent: true,
@@ -121,8 +152,8 @@ const material = new THREE.ShaderMaterial({
 
 // fix transparent invisible bug
 
-const plane = new THREE.Mesh(geometry, material);
-scene.add(plane);
+const menuPlane = new THREE.Mesh(menuGeometry, material);
+scene.add(menuPlane);
 
 const smokeTexture = new THREE.TextureLoader().load('/smoke.png');
 // scene.background = smokeTexture;
@@ -164,15 +195,37 @@ if ('ontouchstart' in window) {
 
 /** @param {MouseEvent} event */
 function handleMouseMove(event) {
-  uniforms.u_mouse.value.x = event.clientX;
-  uniforms.u_mouse.value.y = event.clientY;
+  menuUniforms.u_mouse.value.x = event.clientX;
+  menuUniforms.u_mouse.value.y = event.clientY;
 }
 
 /** @param {TouchEvent} event */
 function handleTouchMove(event) {
-  uniforms.u_mouse.value.x = event.touches[0].clientX;
-  uniforms.u_mouse.value.y = event.touches[0].clientY;
+  menuUniforms.u_mouse.value.x = event.touches[0].clientX;
+  menuUniforms.u_mouse.value.y = event.touches[0].clientY;
 }
+
+/***** TREES *****/
+const treesTexture = new THREE.TextureLoader().load('/trees.png');
+
+const treesGeometry = new THREE.PlaneGeometry(
+  window.innerWidth,
+  window.innerHeight
+);
+const treesMaterial = new THREE.MeshBasicMaterial({
+  map: treesTexture,
+  transparent: true,
+});
+
+const trees = new THREE.Mesh(treesGeometry, treesMaterial);
+trees.position.y = window.innerHeight * 0.05;
+trees.position.z = 10;
+
+// scale up trees
+trees.scale.set(1.1, 1.1);
+
+scene.add(trees);
+/***** END TREES *****/
 
 animate();
 
@@ -192,8 +245,8 @@ function onWindowResize() {
   camera.bottom = -height;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
-  uniforms.u_resolution.value.x = window.innerWidth;
-  uniforms.u_resolution.value.y = window.innerHeight;
+  menuUniforms.u_resolution.value.x = window.innerWidth;
+  menuUniforms.u_resolution.value.y = window.innerHeight;
 }
 
 function animate() {
@@ -201,12 +254,15 @@ function animate() {
 
   elapsedTime += clock.getDelta();
 
-  uniforms.u_time.value = elapsedTime;
+  menuUniforms.u_time.value = elapsedTime;
   uniformsBackground.u_time.value = elapsedTime;
 
   smokeElements.forEach((smokeElement) => {
     smokeElement.rotation.z = elapsedTime * 0.12;
   });
+
+  // move right to left trees using sin
+  trees.position.x = -Math.sin(elapsedTime * 0.1) * 100;
 
   renderer.render(scene, camera);
 }

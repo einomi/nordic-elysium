@@ -1,8 +1,11 @@
+precision highp float;
+
 #define PI (3.1415926535897932384626433832795)
 
 varying vec2 v_uv;
 uniform float u_time;
 uniform sampler2D u_texture;
+uniform float u_opacity;
 
 float random(vec2 st) {
   return fract(sin(dot(st.xy, vec2(12.9898, 78.233))) * 43758.5453123);
@@ -85,5 +88,5 @@ void main() {
 
   vec4 tex = texture2D(u_texture, uv);
 
-  gl_FragColor = vec4(tex);
+  gl_FragColor = vec4(vec3(tex), u_opacity * tex.a);
 }

@@ -7,9 +7,15 @@
     {# <img class="fixed w-full h-full left-0 top-0 object-cover" #}
     {# src="/scenery.jpg" #}
     {# alt="" /> #}
-    <canvas class="fixed webgl opacity-0" data-canvas></canvas>
-    <h1 class="absolute left-[80px] bottom-[60px] uppercase text-[#eee] text-[4vw]">
-      Nordic Elysium
+    <canvas class="fixed webgl" data-canvas></canvas>
+    <h1 class="absolute left-[80px] bottom-[60px] uppercase text-[#eee] text-[4vw]"
+      data-title>
+      <span class="opacity-0" data-source>Nordic Elysium</span>
+      <span class="opacity-0 absolute left-0 whitespace-nowrap"
+        data-letters
+        aria-hidden="true">
+
+      </span>
     </h1>
     <ul class="absolute right-[7vw] top-[30vh] uppercase text-[50px] text-[#444] font-medium">
       {% for item in items %}

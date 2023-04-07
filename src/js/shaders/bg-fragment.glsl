@@ -1,3 +1,4 @@
+precision highp float;
 #define PI (3.1415926535897932384626433832795)
 
 varying vec2 v_uv;
@@ -74,19 +75,42 @@ void main() {
 
   // apply ray animation to the masked area of tex
   if (mask.r == 0.0) {
-     float y = uv.y - sin(u_time * PI  )  * 0.01;
+    //     float y = uv.y - sin(u_time * PI  )  * 0.01;
+
+    // get average color
+    vec4 color = vec4(0.0);
+    for (float i = 0.0; i < 10.0; i++) {
+      color += texture2D(u_texture, vec2(uv.x, uv.y + i * 0.01));
+    }
+    color /= 10.0;
 
 
-    // get noise
-    float n = cnoise(vec2(uv.x * 10.0, y * 10.0)) * 0.01 * sin(u_time * PI * 2.0);
-    // move x left and right
-    float x = uv.x + n * 0.3;
+    //    float y = uv.y - sin(u_time * PI  )  * 0.01;
+
+    // get x as radial distance from center
+    //    float x = length(uv - mid) * 2.0;
+
+
+    // get ray of light
+    float ray = cnoise(vec2(uv.x * 0.01, uv.y * 1.0 - u_time * 0.1)) * 0.5 + 0.5;
+
+    float x =  uv.x * ray;
+
+    // get new color
+    color = mix(color, vec4(1.0), ray);
+
+
     // get new uv
-    vec2 newUv = vec2(x, y);
+    vec2 newUv = vec2(x, uv.y * 1.1 + 0.02);
+
+
     // get new tex
     tex = texture2D(u_texture, newUv);
+  } else {
+    // move right left
+    float x = uv.x + sin(u_time * PI * 0.1) * 0.03;
+    tex = texture2D(u_texture, vec2(x, uv.y));
   }
-
 
 
 
