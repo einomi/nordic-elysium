@@ -162,7 +162,7 @@ const smokeGeometry = new THREE.PlaneGeometry(300, 300);
 const smokeMaterial = new THREE.MeshLambertMaterial({
   map: smokeTexture,
   emissive: '#eee',
-  opacity: 0.5,
+  opacity: 0.2,
   transparent: true,
   // wireframe: true
 });
@@ -170,7 +170,7 @@ const smokeMaterial = new THREE.MeshLambertMaterial({
 /** @type {THREE.Mesh[]} */
 const smokeElements = [];
 
-for (let smokeIndex = 0; smokeIndex < 20; smokeIndex += 1) {
+for (let smokeIndex = 0; smokeIndex < 15; smokeIndex += 1) {
   const smokeElement = new THREE.Mesh(smokeGeometry, smokeMaterial);
   const scale = Math.max(3, Math.random() * 9);
   smokeElement.scale.set(scale, scale, scale);

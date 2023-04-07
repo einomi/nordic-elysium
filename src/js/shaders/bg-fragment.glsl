@@ -1,4 +1,4 @@
-precision highp float;
+//precision highp float;
 #define PI (3.1415926535897932384626433832795)
 
 varying vec2 v_uv;
@@ -75,45 +75,37 @@ void main() {
 
   // apply ray animation to the masked area of tex
   if (mask.r == 0.0) {
-    //     float y = uv.y - sin(u_time * PI  )  * 0.01;
+    // add water noise
+    float noise = cnoise(vec2(uv.x) * 0.3 - u_time * 0.1);
+    float noise2 = cnoise(uv * 50.0 - u_time * 0.4);
 
-    // get average color
-    vec4 color = vec4(0.0);
-    for (float i = 0.0; i < 10.0; i++) {
-      color += texture2D(u_texture, vec2(uv.x, uv.y + i * 0.01));
-    }
-    color /= 10.0;
-
-
-    //    float y = uv.y - sin(u_time * PI  )  * 0.01;
-
-    // get x as radial distance from center
-    //    float x = length(uv - mid) * 2.0;
 
 
     // get ray of light
-    float ray = cnoise(vec2(uv.x * 0.01, uv.y * 1.0 - u_time * 0.1)) * 0.5 + 0.5;
+    float ray = cnoise(vec2(uv.x * 0.01  - u_time * 0.1, uv.x * 1.0 - u_time * 0.1)) * 0.5 + 0.5;
 
-    float x =  uv.x * ray;
+    float x =  uv.x * ray ;
 
-    // get new color
-    color = mix(color, vec4(1.0), ray);
+    // add noise
 
+    // move y up continuously
+    float y = uv.y - noise * 0.1 - noise2 * 0.05;
 
     // get new uv
-    vec2 newUv = vec2(x, uv.y * 1.1 + 0.02);
+    vec2 newUv = vec2(uv.x, y );
 
 
     // get new tex
     tex = texture2D(u_texture, newUv);
+    gl_FragColor = vec4(tex.r * 0.95, tex.g * 0.95, tex.b * 1.0, 1.0);
   } else {
     // move right left
     float x = uv.x + sin(u_time * PI * 0.1) * 0.03;
     tex = texture2D(u_texture, vec2(x, uv.y));
+    gl_FragColor = tex;
   }
 
 
 
 
-  gl_FragColor = vec4(tex);
 }
