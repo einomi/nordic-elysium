@@ -178,7 +178,7 @@ for (let smokeIndex = 0; smokeIndex < 15; smokeIndex += 1) {
   // stick elements to the right side of the screen
   smokeElement.position.x = window.innerWidth / 1.5;
   smokeElement.position.y = Math.random() * 100 - 50;
-  smokeElement.position.z = Math.random() * 100 - 50;
+  smokeElement.position.z = 100 + Math.random() * 100 - 50;
 
   smokeElement.rotation.z = Math.random() * 360;
   scene.add(smokeElement);

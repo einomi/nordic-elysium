@@ -73,7 +73,7 @@ void main() {
 
   // add noise
   float noise2 = cnoise(uv * 20.0 + u_time * 0.5);
-  uv.y += wave + noise2 * 0.001;
+  uv.y += wave + noise2 * 0.005;
 //
 //  // wave x
 //  float waveX = sin(uv.x * 5.0 + u_time * 0.01) * 0.1;
@@ -81,7 +81,7 @@ void main() {
 
   // add cloud distortion
   float cloud = cnoise(uv * 0.1 + u_time * 0.01);
-  uv.x += cloud * 0.2 + noise2 * 0.001;
+  uv.x += cloud * 0.1 + noise2 * 0.01;
 //  uv.y += cloud * 0.3;
 
 
