@@ -1,22 +1,12 @@
 precision highp float;
 
-#define PI (3.1415926535897932384626433832795)
-
 varying vec2 v_uv;
-uniform float u_time;
+
 uniform sampler2D u_texture;
-uniform float u_opacity;
-
-float random(vec2 st) {
-  return fract(sin(dot(st.xy, vec2(12.9898, 78.233))) * 43758.5453123);
-}
-
-vec2 rotate(vec2 uv, float rotation, vec2 mid) {
-  return vec2(
-    cos(rotation) * (uv.x - mid.x) + sin(rotation) * (uv.y - mid.y) + mid.x,
-    cos(rotation) * (uv.y - mid.y) - sin(rotation) * (uv.x - mid.x) + mid.y
-  );
-}
+uniform sampler2D u_river_mask;
+uniform float u_time;
+uniform vec2 u_resolution;
+uniform sampler2D u_water_displacement;
 
 //	Classic Perlin 2D Noise
 //	by Stefan Gustavson
@@ -64,29 +54,46 @@ float cnoise(vec2 P) {
   return 2.3 * n_xy;
 }
 
+float cnoise1d(float x) {
+  return cnoise(vec2(x, 0.0));
+}
+
 void main() {
-  // set texture
   vec2 uv = v_uv;
 
-  // make waves
-  float wave = sin(uv.y * 5.0 + u_time * 0.03) * 0.1;
+  vec4 river_mask = texture2D(u_river_mask, uv);
+  float river_mask_value = river_mask.r;
 
-  // add noise
-  float noise2 = cnoise(uv * 20.0 + u_time * 0.5);
-  uv.y += wave + noise2 * 0.005;
+  vec4 color = texture2D(u_texture, uv);
 
-  float cloud = cnoise(uv * 0.1 + u_time * 0.01);
-  uv.x += cloud * 0.1 + noise2 * 0.01;
+  if (river_mask_value < 0.5) {
+    // Add some noise to the fragment coordinates
+    //    vec2 noise = vec2(0.1, 0.1) * vec2(sin(u_time), cos(u_time)) * 0.1;
 
-  // rotate using noise
-  float noise = cnoise(uv * 0.01 + u_time * 0.01);
-  uv = rotate(uv, noise * PI * 0.05, vec2(0.5, 0.5));
+    // use cnoise instead of noise
+    vec2 noise =
+      vec2(0.1, 0.1) *
+      vec2(cnoise(uv * 0.1 + u_time * 0.1), cnoise(uv * 0.1 + u_time * 0.1)) *
+      10.01;
 
-  vec4 tex = texture2D(u_texture, uv);
+    vec2 coord = uv;
 
-  float brightness = 0.9;
+    float waveFactor = 0.01;
 
-  vec3 color = vec3(tex.r * 0.9, tex.g * 0.9, tex.b * 1.0);
+    // Create a wave pattern using sine waves
+    float wave1 = cnoise1d(coord.x * 50.0 + u_time * 1.0) * waveFactor;
+    float wave2 = cnoise1d(coord.y * 30.0 + u_time * 0.5) * waveFactor;
+    float wave3 =
+      cnoise1d((coord.x + coord.y * 10.0) * 1.0 + u_time * 0.3) * waveFactor;
+    float waves = wave1 + wave2 + wave3;
 
-  gl_FragColor = vec4(color * brightness, u_opacity * tex.a);
+    uv.x += waves * 0.5 + texture2D(u_water_displacement, uv).r * 0.05;
+    uv.y += waves * 0.1 + texture2D(u_water_displacement, uv).r * 0.01;
+
+    // Get the color from the texture
+    color = texture2D(u_texture, uv);
+
+  }
+
+  gl_FragColor = vec4(color);
 }

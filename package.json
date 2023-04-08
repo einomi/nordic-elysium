@@ -81,6 +81,7 @@
     "postcss": "^8.4.12",
     "postcss-assets": "^5.0.0",
     "prettier": "2.5.1",
+    "prettier-plugin-glsl": "^0.0.10",
     "prettier-plugin-twig-nunjucks-melody": "^0.1.0",
     "rimraf": "^3.0.2",
     "stylelint": "^13.11.0",

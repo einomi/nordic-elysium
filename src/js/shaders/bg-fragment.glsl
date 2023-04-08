@@ -64,7 +64,6 @@ float cnoise(vec2 P) {
 }
 
 void main() {
-
   // display texture as background cover
   vec2 uv = v_uv;
   vec2 mid = vec2(0.5, 0.5);
@@ -79,12 +78,13 @@ void main() {
     float noise = cnoise(vec2(uv.x) * 0.3 - u_time * 0.1);
     float noise2 = cnoise(uv * 50.0 - u_time * 0.4);
 
-
-
     // get ray of light
-    float ray = cnoise(vec2(uv.x * 0.01  - u_time * 0.1, uv.x * 1.0 - u_time * 0.1)) * 0.5 + 0.5;
+    float ray =
+      cnoise(vec2(uv.x * 0.01 - u_time * 0.1, uv.x * 1.0 - u_time * 0.1)) *
+        0.5 +
+      0.5;
 
-    float x =  uv.x * ray ;
+    float x = uv.x * ray;
 
     // add noise
 
@@ -92,20 +92,19 @@ void main() {
     float y = uv.y - noise * 0.1 - noise2 * 0.05;
 
     // get new uv
-    vec2 newUv = vec2(uv.x, y );
+    vec2 newUv = vec2(uv.x, y);
 
+    float brightness = 1.3;
 
     // get new tex
     tex = texture2D(u_texture, newUv);
-    gl_FragColor = vec4(tex.r * 0.95, tex.g * 0.95, tex.b * 1.0, 1.0);
+    vec3 color = vec3(tex.r * 0.4, tex.g * 1.0, tex.b * 0.9);
+    gl_FragColor = vec4(color * brightness, 1.0);
   } else {
     // move right left
     float x = uv.x + sin(u_time * PI * 0.1) * 0.03;
     tex = texture2D(u_texture, vec2(x, uv.y));
     gl_FragColor = tex;
   }
-
-
-
 
 }

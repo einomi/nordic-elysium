@@ -4,6 +4,7 @@ import gsap from 'gsap';
 import vertexShader from './shaders/vertex.glsl';
 import fragmentShader from './shaders/fragment.glsl';
 import bgFragmentShader from './shaders/bg-fragment.glsl';
+import cityFragmentShader from './shaders/city-fragment.glsl';
 
 let elapsedTime = 0;
 
@@ -13,6 +14,10 @@ const canvas = /** @type {HTMLCanvasElement} */ (
 
 const menuBackgroundOpacity = {
   value: 0,
+};
+
+const resolution = {
+  value: new THREE.Vector2(window.innerWidth, window.innerHeight),
 };
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -102,7 +107,7 @@ const uniformsBackground = {
   u_texture: { value: loader.load('/scenery.jpg') },
   u_mask: { value: maskTexture },
   u_time: { value: 0.0 },
-  u_resolution: { value: new THREE.Vector2() },
+  u_resolution: resolution,
   u_mouse: { value: { x: 0.0, y: 0.0 } },
   u_duration: { value: 8.0 },
 };
@@ -111,7 +116,7 @@ const materialBackground = new THREE.ShaderMaterial({
   uniforms: uniformsBackground,
   vertexShader,
   fragmentShader: bgFragmentShader,
-  transparent: true,
+  transparent: false,
   side: THREE.FrontSide,
 });
 
@@ -135,13 +140,13 @@ menuGeometry.translate(window.innerWidth / 5, 0, 0);
 const menuUniforms = {
   u_texture: { value: loader.load('/menu.png') },
   u_time: { value: 0.0 },
-  u_resolution: { value: new THREE.Vector2() },
+  u_resolution: resolution,
   u_mouse: { value: { x: 0.0, y: 0.0 } },
   u_duration: { value: 8.0 },
   u_opacity: menuBackgroundOpacity,
 };
 
-const material = new THREE.ShaderMaterial({
+const menuMaterial = new THREE.ShaderMaterial({
   uniforms: menuUniforms,
   vertexShader,
   fragmentShader,
@@ -152,8 +157,9 @@ const material = new THREE.ShaderMaterial({
 
 // fix transparent invisible bug
 
-const menuPlane = new THREE.Mesh(menuGeometry, material);
-scene.add(menuPlane);
+const menu = new THREE.Mesh(menuGeometry, menuMaterial);
+menu.position.z = 2;
+scene.add(menu);
 
 const smokeTexture = new THREE.TextureLoader().load('/smoke.png');
 // scene.background = smokeTexture;
@@ -185,7 +191,6 @@ for (let smokeIndex = 0; smokeIndex < 15; smokeIndex += 1) {
   smokeElements.push(smokeElement);
 }
 
-onWindowResize();
 if ('ontouchstart' in window) {
   document.addEventListener('touchmove', handleTouchMove);
 } else {
@@ -193,16 +198,14 @@ if ('ontouchstart' in window) {
   document.addEventListener('mousemove', handleMouseMove);
 }
 
-/** @param {MouseEvent} event */
-function handleMouseMove(event) {
-  menuUniforms.u_mouse.value.x = event.clientX;
-  menuUniforms.u_mouse.value.y = event.clientY;
+/** @param {MouseEvent} _event */
+function handleMouseMove(_event) {
+  // pass
 }
 
-/** @param {TouchEvent} event */
-function handleTouchMove(event) {
-  menuUniforms.u_mouse.value.x = event.touches[0].clientX;
-  menuUniforms.u_mouse.value.y = event.touches[0].clientY;
+/** @param {TouchEvent} _event */
+function handleTouchMove(_event) {
+  // pass
 }
 
 /***** TREES *****/
@@ -218,23 +221,93 @@ const treesMaterial = new THREE.MeshBasicMaterial({
 });
 
 const trees = new THREE.Mesh(treesGeometry, treesMaterial);
-trees.position.y = window.innerHeight * 0.05;
-trees.position.z = 10;
 
 // scale up trees
-trees.scale.set(1.1, 1.1);
+const treesScaleTo = 1.03;
+trees.scale.set(treesScaleTo, treesScaleTo, 1);
+trees.position.y = -window.innerHeight * (1 - 1 / treesScaleTo);
+trees.position.z = 10;
 
 scene.add(trees);
 /***** END TREES *****/
 
+/***** CITY LAYER *****/
+const cityTexture = new THREE.TextureLoader().load('/city.png');
+const cityGeometry = new THREE.PlaneGeometry(
+  window.innerWidth,
+  window.innerHeight
+);
+
+// load river-mask texture
+const riverMaskTexture = new THREE.TextureLoader().load('/river-mask.png');
+
+// load water-displacement texture
+const waterDisplacementTexture = new THREE.TextureLoader().load(
+  '/water-displacement.jpg'
+);
+
+const uniformsCity = {
+  u_texture: { value: cityTexture },
+  u_river_mask: { value: riverMaskTexture },
+  u_water_displacement: { value: waterDisplacementTexture },
+  u_time: { value: 0.0 },
+  u_resolution: resolution,
+};
+
+const cityMaterial = new THREE.ShaderMaterial({
+  transparent: true,
+  side: THREE.FrontSide,
+  vertexShader,
+  fragmentShader: cityFragmentShader,
+  uniforms: uniformsCity,
+});
+
+const city = new THREE.Mesh(cityGeometry, cityMaterial);
+city.position.z = 1;
+
+city.scale.set(1.1, 1.1, 1);
+
+scene.add(city);
+/***** END CITY LAYER *****/
+
+/***** EXPLOSION LAYER *****/
+const explosionTexture = new THREE.TextureLoader().load('/explosion.png');
+const explosionGeometry = new THREE.PlaneGeometry(
+  window.innerWidth,
+  window.innerHeight
+);
+
+// standard material
+const explosionMaterial = new THREE.MeshBasicMaterial({
+  transparent: true,
+  map: explosionTexture,
+  side: THREE.FrontSide,
+});
+
+const explosion = new THREE.Mesh(explosionGeometry, explosionMaterial);
+
+explosion.position.y = -30;
+
+explosion.position.z = 0;
+
+// scale up
+explosion.scale.set(1.1, 1.1, 1);
+
+// add explosion
+scene.add(explosion);
+/***** END EXPLOSION LAYER *****/
+
 animate();
 
 function onWindowResize() {
-  const aspectRatio = window.innerWidth / window.innerHeight;
+  const windowWidth = window.innerWidth;
+  const windowHeight = window.innerHeight;
+
+  const aspectRatio = windowWidth / windowHeight;
   let width, height;
   if (aspectRatio >= 1) {
     width = 1;
-    height = (window.innerHeight / window.innerWidth) * width;
+    height = (windowHeight / windowWidth) * width;
   } else {
     width = aspectRatio;
     height = 1;
@@ -244,10 +317,16 @@ function onWindowResize() {
   camera.top = height;
   camera.bottom = -height;
   camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  menuUniforms.u_resolution.value.x = window.innerWidth;
-  menuUniforms.u_resolution.value.y = window.innerHeight;
+  renderer.setSize(windowWidth, windowHeight);
+  menuUniforms.u_resolution.value.x = windowWidth;
+  menuUniforms.u_resolution.value.y = windowHeight;
+  uniformsBackground.u_resolution.value.x = windowWidth;
+  uniformsBackground.u_resolution.value.y = windowHeight;
+  uniformsCity.u_resolution.value.x = windowWidth;
+  uniformsCity.u_resolution.value.y = windowHeight;
 }
+
+onWindowResize();
 
 function animate() {
   requestAnimationFrame(animate);
@@ -256,13 +335,26 @@ function animate() {
 
   menuUniforms.u_time.value = elapsedTime;
   uniformsBackground.u_time.value = elapsedTime;
+  uniformsCity.u_time.value = elapsedTime;
 
   smokeElements.forEach((smokeElement) => {
     smokeElement.rotation.z = elapsedTime * 0.12;
   });
 
   // move right to left trees using sin
-  trees.position.x = -Math.sin(elapsedTime * 0.1) * 100;
+  trees.position.x = -Math.sin(elapsedTime * 0.1) * 20;
+
+  city.position.x = Math.sin(elapsedTime * 0.07) * 50;
+
+  // move explosion
+  explosion.position.x = Math.sin(elapsedTime * 0.01) * 15;
+
+  // change explosion scale
+  explosion.scale.set(
+    1.1 + Math.sin(elapsedTime * 0.1) * 0.1,
+    1.1 + Math.sin(elapsedTime * 0.1) * 0.1,
+    1
+  );
 
   renderer.render(scene, camera);
 }
