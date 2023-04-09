@@ -75,7 +75,7 @@ void main() {
 
   vec4 color = texture2D(u_texture, uv);
 
-  if (river_mask_value < 0.5) {
+  if (river_mask_value < 0.2) {
     // Add some noise to the fragment coordinates
     //    vec2 noise = vec2(0.1, 0.1) * vec2(sin(u_time), cos(u_time)) * 0.1;
 
