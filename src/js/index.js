@@ -8,8 +8,11 @@ import cityFragmentShader from './shaders/city-fragment.glsl';
 
 let elapsedTime = 0;
 
+const windowWidth = window.innerWidth;
+const windowHeight = window.innerHeight;
+
 const SCENE_ASPECT_RATIO = 2136 / 1113;
-const VIEWPORT_ASPECT_RATIO = window.innerWidth / window.innerHeight;
+const VIEWPORT_ASPECT_RATIO = windowWidth / windowHeight;
 const IS_PORTRAIT = VIEWPORT_ASPECT_RATIO < 1;
 
 const canvas = /** @type {HTMLCanvasElement} */ (
@@ -21,7 +24,7 @@ const menuBackgroundOpacity = {
 };
 
 const resolution = {
-  value: new THREE.Vector2(window.innerWidth, window.innerHeight),
+  value: new THREE.Vector2(windowWidth, windowHeight),
 };
 
 const sceneResolution = {
@@ -84,7 +87,7 @@ const scene = new THREE.Scene();
 // set perspective camera
 const camera = new THREE.PerspectiveCamera(
   75,
-  window.innerWidth / window.innerHeight,
+  windowWidth / windowHeight,
   0.1,
   1000
 );
@@ -92,8 +95,7 @@ const camera = new THREE.PerspectiveCamera(
 const cameraDistance = 600;
 camera.position.z = cameraDistance;
 // set fov as in pixels
-camera.fov =
-  2 * Math.atan(window.innerHeight / 2 / cameraDistance) * (180 / Math.PI);
+camera.fov = 2 * Math.atan(windowHeight / 2 / cameraDistance) * (180 / Math.PI);
 
 const renderer = new THREE.WebGLRenderer({
   canvas,
@@ -102,7 +104,7 @@ const renderer = new THREE.WebGLRenderer({
 });
 // set device pixel ratio
 renderer.setPixelRatio(window.devicePixelRatio || 1);
-renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setSize(windowWidth, windowHeight);
 
 const clock = new THREE.Clock();
 
@@ -128,25 +130,20 @@ const materialBackground = new THREE.ShaderMaterial({
   side: THREE.FrontSide,
 });
 
-const geometryBackground = new THREE.PlaneGeometry(
-  window.innerWidth,
-  window.innerHeight
-);
+const geometryBackground = new THREE.PlaneGeometry(windowWidth, windowHeight);
 
 const planeBackground = new THREE.Mesh(geometryBackground, materialBackground);
 scene.add(planeBackground);
 
 function getMenuGeometry() {
-  const isPortrait = window.innerHeight > window.innerWidth;
-  const width = isPortrait ? window.innerWidth : window.innerWidth / 1.5;
-  const height = isPortrait
-    ? window.innerHeight / 1.5
-    : window.innerHeight + 100;
+  const isPortrait = windowHeight > windowWidth;
+  const width = isPortrait ? windowWidth : windowWidth / 1.5;
+  const height = isPortrait ? windowHeight / 1.5 : windowHeight + 100;
 
   const menuGeometry = new THREE.PlaneGeometry(width, height);
 
   // change position of plane to right side
-  menuGeometry.translate(window.innerWidth / 5, 0, 0);
+  menuGeometry.translate(windowWidth / 5, 0, 0);
 
   return menuGeometry;
 }
@@ -182,10 +179,10 @@ const smokeTexture = new THREE.TextureLoader().load('/smoke.png');
 // scene.background = smokeTexture;
 smokeTexture.encoding = THREE.sRGBEncoding;
 
-const smokeMinSize = window.innerHeight * 0.05;
+const smokeMinSize = windowHeight * 0.05;
 
 const smokeSize =
-  Math.random() * (smokeMinSize + window.innerHeight * 0.2) + smokeMinSize;
+  Math.random() * (smokeMinSize + windowHeight * 0.2) + smokeMinSize;
 const smokeGeometry = new THREE.PlaneGeometry(smokeSize, smokeSize);
 const smokeMaterial = new THREE.MeshLambertMaterial({
   map: smokeTexture,
@@ -204,9 +201,8 @@ for (let smokeIndex = 0; smokeIndex < 3; smokeIndex += 1) {
   smokeElement.scale.set(scale, scale, scale);
 
   // stick elements to the right side of the screen
-  smokeElement.position.x =
-    window.innerWidth / 2 - (Math.random() * window.innerWidth) / 3;
-  smokeElement.position.y = -(Math.random() * window.innerHeight) / 2;
+  smokeElement.position.x = windowWidth / 2 - (Math.random() * windowWidth) / 3;
+  smokeElement.position.y = -(Math.random() * windowHeight) / 2;
   smokeElement.position.z = 100 + Math.random() * 100 - 50;
 
   smokeElement.rotation.z = Math.random() * 360;
@@ -234,10 +230,7 @@ function handleTouchMove(_event) {
 /***** TREES *****/
 const treesTexture = new THREE.TextureLoader().load('/trees.png');
 
-const treesGeometry = new THREE.PlaneGeometry(
-  window.innerWidth,
-  window.innerHeight
-);
+const treesGeometry = new THREE.PlaneGeometry(windowWidth, windowHeight);
 
 const treesMaterial = new THREE.MeshBasicMaterial({
   map: treesTexture,
@@ -247,7 +240,7 @@ const treesMaterial = new THREE.MeshBasicMaterial({
 
 treesMaterial.map?.repeat.set(
   1,
-  (SCENE_ASPECT_RATIO * window.innerHeight) / window.innerWidth
+  (SCENE_ASPECT_RATIO * windowHeight) / windowWidth
 );
 
 const trees = new THREE.Mesh(treesGeometry, treesMaterial);
@@ -255,7 +248,7 @@ const trees = new THREE.Mesh(treesGeometry, treesMaterial);
 // scale up trees
 const treesScaleTo = 1.1;
 trees.scale.set(treesScaleTo, treesScaleTo, 1);
-trees.position.y = (window.innerHeight * (treesScaleTo - 1)) / 2;
+trees.position.y = (windowHeight * (treesScaleTo - 1)) / 2;
 trees.position.z = 10;
 
 scene.add(trees);
@@ -263,10 +256,17 @@ scene.add(trees);
 
 /***** CITY LAYER *****/
 const cityTexture = new THREE.TextureLoader().load('/city.png');
-const cityGeometry = new THREE.PlaneGeometry(
-  window.innerWidth,
-  window.innerHeight
-);
+const cityAspectRatio = 2136 / 688;
+
+const cityAspectScale =
+  sceneResolution.value.y /
+  sceneResolution.value.x /
+  (resolution.value.y / resolution.value.x);
+
+const cityHeight =
+  (SCENE_ASPECT_RATIO / cityAspectRatio) * windowHeight * cityAspectScale;
+
+const cityGeometry = new THREE.PlaneGeometry(windowWidth, cityHeight);
 
 // load river-mask texture
 const riverMaskTexture = new THREE.TextureLoader().load('/river-mask.png');
@@ -296,6 +296,10 @@ const cityMaterial = new THREE.ShaderMaterial({
 });
 
 const city = new THREE.Mesh(cityGeometry, cityMaterial);
+
+// move to the bottom
+city.position.y = cityHeight / 2 - windowHeight / 2;
+
 city.position.z = 1;
 
 city.scale.set(1.1, 1.1, 1);
@@ -307,13 +311,17 @@ scene.add(city);
 const explosionTexture = new THREE.TextureLoader().load('/explosion.png');
 const explosionTextureAspectRatio = 2136 / 514;
 
-const explosionGeometry = new THREE.PlaneGeometry(
-  window.innerWidth,
-  ((SCENE_ASPECT_RATIO / explosionTextureAspectRatio) *
-    window.innerHeight *
-    (sceneResolution.value.y / sceneResolution.value.x)) /
-    (resolution.value.y / resolution.value.x)
-);
+const explosionAspectScale =
+  sceneResolution.value.y /
+  sceneResolution.value.x /
+  (resolution.value.y / resolution.value.x);
+
+const explosionHeight =
+  (SCENE_ASPECT_RATIO / explosionTextureAspectRatio) *
+  windowHeight *
+  explosionAspectScale;
+
+const explosionGeometry = new THREE.PlaneGeometry(windowWidth, explosionHeight);
 
 // standard material
 const explosionMaterial = new THREE.MeshBasicMaterial({
@@ -324,34 +332,29 @@ const explosionMaterial = new THREE.MeshBasicMaterial({
 
 const explosion = new THREE.Mesh(explosionGeometry, explosionMaterial);
 
-const explosionAspectScale =
-  (resolution.value.y * (sceneResolution.value.y / sceneResolution.value.x)) /
-  (resolution.value.y / resolution.value.x);
-
-explosion.position.y = (IS_PORTRAIT ? -0.1 : 0.28) * explosionAspectScale;
+explosion.position.y =
+  explosionHeight / 2 - windowHeight / 2 + cityHeight - windowWidth * 0.1;
 
 explosion.position.z = 0;
 
 const explosionScale = IS_PORTRAIT ? 2.0 : 1.1;
 
-// scale up
 explosion.scale.set(explosionScale, explosionScale, 1);
 
-// add explosion
 scene.add(explosion);
 /***** END EXPLOSION LAYER *****/
 
 animate();
 
 function onWindowResize() {
-  const windowWidth = window.innerWidth;
-  const windowHeight = window.innerHeight;
+  const newWindowWidth = window.innerWidth;
+  const newWindowHeight = window.innerHeight;
 
-  const aspectRatio = windowWidth / windowHeight;
+  const aspectRatio = newWindowWidth / newWindowHeight;
   let width, height;
   if (aspectRatio >= 1) {
     width = 1;
-    height = (windowHeight / windowWidth) * width;
+    height = (newWindowHeight / newWindowWidth) * width;
   } else {
     width = aspectRatio;
     height = 1;
@@ -361,13 +364,13 @@ function onWindowResize() {
   camera.top = height;
   camera.bottom = -height;
   camera.updateProjectionMatrix();
-  renderer.setSize(windowWidth, windowHeight);
-  menuUniforms.u_resolution.value.x = windowWidth;
-  menuUniforms.u_resolution.value.y = windowHeight;
-  uniformsBackground.u_resolution.value.x = windowWidth;
-  uniformsBackground.u_resolution.value.y = windowHeight;
-  uniformsCity.u_resolution.value.x = windowWidth;
-  uniformsCity.u_resolution.value.y = windowHeight;
+  renderer.setSize(newWindowWidth, newWindowHeight);
+  menuUniforms.u_resolution.value.x = newWindowWidth;
+  menuUniforms.u_resolution.value.y = newWindowHeight;
+  uniformsBackground.u_resolution.value.x = newWindowWidth;
+  uniformsBackground.u_resolution.value.y = newWindowHeight;
+  uniformsCity.u_resolution.value.x = newWindowWidth;
+  uniformsCity.u_resolution.value.y = newWindowHeight;
 }
 
 onWindowResize();

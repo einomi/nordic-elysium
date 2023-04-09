@@ -69,9 +69,9 @@ void main() {
   vec2 mid = vec2(0.5, 0.5);
   vec4 tex = texture2D(u_texture, uv);
 
-  if (uv.y < 0.4) {
-    discard;
-  }
+  //  if (uv.y < 0.1) {
+  //    discard;
+  //  }
 
   // get mask
   vec4 mask = texture2D(u_mask, uv);
