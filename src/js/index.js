@@ -2,11 +2,15 @@ import * as THREE from 'three';
 import gsap from 'gsap';
 
 import vertexShader from './shaders/vertex.glsl';
-import fragmentShader from './shaders/fragment.glsl';
+import menuFragmentShader from './shaders/menu-fragment.glsl';
 import bgFragmentShader from './shaders/bg-fragment.glsl';
 import cityFragmentShader from './shaders/city-fragment.glsl';
 
 let elapsedTime = 0;
+
+const SCENE_ASPECT_RATIO = 2136 / 1113;
+const VIEWPORT_ASPECT_RATIO = window.innerWidth / window.innerHeight;
+const IS_PORTRAIT = VIEWPORT_ASPECT_RATIO < 1;
 
 const canvas = /** @type {HTMLCanvasElement} */ (
   document.querySelector('canvas.webgl')
@@ -18,6 +22,10 @@ const menuBackgroundOpacity = {
 
 const resolution = {
   value: new THREE.Vector2(window.innerWidth, window.innerHeight),
+};
+
+const sceneResolution = {
+  value: new THREE.Vector2(2136, 1113),
 };
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -128,28 +136,37 @@ const geometryBackground = new THREE.PlaneGeometry(
 const planeBackground = new THREE.Mesh(geometryBackground, materialBackground);
 scene.add(planeBackground);
 
-const menuGeometry = new THREE.PlaneGeometry(
-  window.innerWidth / 1.5,
-  window.innerHeight + 100
-);
+function getMenuGeometry() {
+  const isPortrait = window.innerHeight > window.innerWidth;
+  const width = isPortrait ? window.innerWidth : window.innerWidth / 1.5;
+  const height = isPortrait
+    ? window.innerHeight / 1.5
+    : window.innerHeight + 100;
 
-// change position of plane to right side
-menuGeometry.translate(window.innerWidth / 5, 0, 0);
+  const menuGeometry = new THREE.PlaneGeometry(width, height);
+
+  // change position of plane to right side
+  menuGeometry.translate(window.innerWidth / 5, 0, 0);
+
+  return menuGeometry;
+}
+
+const menuGeometry = getMenuGeometry();
 
 // eslint-disable-next-line sonarjs/prefer-object-literal
 const menuUniforms = {
-  u_texture: { value: loader.load('/menu.png') },
+  u_texture: { value: loader.load('/menu3.png') },
   u_time: { value: 0.0 },
-  u_resolution: resolution,
   u_mouse: { value: { x: 0.0, y: 0.0 } },
   u_duration: { value: 8.0 },
   u_opacity: menuBackgroundOpacity,
+  u_resolution: resolution,
 };
 
 const menuMaterial = new THREE.ShaderMaterial({
   uniforms: menuUniforms,
   vertexShader,
-  fragmentShader,
+  fragmentShader: menuFragmentShader,
   transparent: true,
   side: THREE.FrontSide,
   depthWrite: false,
@@ -164,11 +181,16 @@ scene.add(menu);
 const smokeTexture = new THREE.TextureLoader().load('/smoke.png');
 // scene.background = smokeTexture;
 smokeTexture.encoding = THREE.sRGBEncoding;
-const smokeGeometry = new THREE.PlaneGeometry(300, 300);
+
+const smokeMinSize = window.innerHeight * 0.05;
+
+const smokeSize =
+  Math.random() * (smokeMinSize + window.innerHeight * 0.2) + smokeMinSize;
+const smokeGeometry = new THREE.PlaneGeometry(smokeSize, smokeSize);
 const smokeMaterial = new THREE.MeshLambertMaterial({
   map: smokeTexture,
   emissive: '#eee',
-  opacity: 0.2,
+  opacity: 0.1,
   transparent: true,
   // wireframe: true
 });
@@ -176,14 +198,15 @@ const smokeMaterial = new THREE.MeshLambertMaterial({
 /** @type {THREE.Mesh[]} */
 const smokeElements = [];
 
-for (let smokeIndex = 0; smokeIndex < 15; smokeIndex += 1) {
+for (let smokeIndex = 0; smokeIndex < 3; smokeIndex += 1) {
   const smokeElement = new THREE.Mesh(smokeGeometry, smokeMaterial);
-  const scale = Math.max(3, Math.random() * 9);
+  const scale = Math.max(4, Math.random() * 9);
   smokeElement.scale.set(scale, scale, scale);
 
   // stick elements to the right side of the screen
-  smokeElement.position.x = window.innerWidth / 1.5;
-  smokeElement.position.y = Math.random() * 100 - 50;
+  smokeElement.position.x =
+    window.innerWidth / 2 - (Math.random() * window.innerWidth) / 3;
+  smokeElement.position.y = -(Math.random() * window.innerHeight) / 2;
   smokeElement.position.z = 100 + Math.random() * 100 - 50;
 
   smokeElement.rotation.z = Math.random() * 360;
@@ -215,17 +238,24 @@ const treesGeometry = new THREE.PlaneGeometry(
   window.innerWidth,
   window.innerHeight
 );
+
 const treesMaterial = new THREE.MeshBasicMaterial({
   map: treesTexture,
   transparent: true,
+  side: THREE.FrontSide,
 });
+
+treesMaterial.map?.repeat.set(
+  1,
+  (SCENE_ASPECT_RATIO * window.innerHeight) / window.innerWidth
+);
 
 const trees = new THREE.Mesh(treesGeometry, treesMaterial);
 
 // scale up trees
-const treesScaleTo = 1.03;
+const treesScaleTo = 1.1;
 trees.scale.set(treesScaleTo, treesScaleTo, 1);
-trees.position.y = -window.innerHeight * (1 - 1 / treesScaleTo);
+trees.position.y = (window.innerHeight * (treesScaleTo - 1)) / 2;
 trees.position.z = 10;
 
 scene.add(trees);
@@ -252,6 +282,9 @@ const uniformsCity = {
   u_water_displacement: { value: waterDisplacementTexture },
   u_time: { value: 0.0 },
   u_resolution: resolution,
+  u_scene_resolution: sceneResolution,
+  u_scene_aspect_ratio: { value: SCENE_ASPECT_RATIO },
+  u_viewport_aspect_ratio: { value: VIEWPORT_ASPECT_RATIO },
 };
 
 const cityMaterial = new THREE.ShaderMaterial({
@@ -272,9 +305,14 @@ scene.add(city);
 
 /***** EXPLOSION LAYER *****/
 const explosionTexture = new THREE.TextureLoader().load('/explosion.png');
+const explosionTextureAspectRatio = 2136 / 514;
+
 const explosionGeometry = new THREE.PlaneGeometry(
   window.innerWidth,
-  window.innerHeight
+  ((SCENE_ASPECT_RATIO / explosionTextureAspectRatio) *
+    window.innerHeight *
+    (sceneResolution.value.y / sceneResolution.value.x)) /
+    (resolution.value.y / resolution.value.x)
 );
 
 // standard material
@@ -286,12 +324,18 @@ const explosionMaterial = new THREE.MeshBasicMaterial({
 
 const explosion = new THREE.Mesh(explosionGeometry, explosionMaterial);
 
-explosion.position.y = -30;
+const explosionAspectScale =
+  (resolution.value.y * (sceneResolution.value.y / sceneResolution.value.x)) /
+  (resolution.value.y / resolution.value.x);
+
+explosion.position.y = (IS_PORTRAIT ? -0.1 : 0.28) * explosionAspectScale;
 
 explosion.position.z = 0;
 
+const explosionScale = IS_PORTRAIT ? 2.0 : 1.1;
+
 // scale up
-explosion.scale.set(1.1, 1.1, 1);
+explosion.scale.set(explosionScale, explosionScale, 1);
 
 // add explosion
 scene.add(explosion);
@@ -351,8 +395,8 @@ function animate() {
 
   // change explosion scale
   explosion.scale.set(
-    1.1 + Math.sin(elapsedTime * 0.1) * 0.1,
-    1.1 + Math.sin(elapsedTime * 0.1) * 0.1,
+    explosionScale + Math.sin(elapsedTime * 0.1) * 0.1,
+    explosionScale + Math.sin(elapsedTime * 0.1) * 0.1,
     1
   );
 

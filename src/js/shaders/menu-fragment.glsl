@@ -84,9 +84,9 @@ void main() {
 
   vec4 tex = texture2D(u_texture, uv);
 
-  float brightness = 0.9;
+  float brightness = 0.95;
 
-  vec3 color = vec3(tex.r * 0.9, tex.g * 0.9, tex.b * 1.0);
+  vec3 color = vec3(tex.r * 0.95, tex.g * 0.95, tex.b * 1.0);
 
   gl_FragColor = vec4(color * brightness, u_opacity * tex.a);
 }
