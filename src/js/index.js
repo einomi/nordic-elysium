@@ -309,10 +309,10 @@ function animate() {
   uniformsBackground.u_time.value = elapsedTime;
   uniformsCity.u_time.value = elapsedTime;
 
-  smokeLayer.meshes.forEach((mesh) => {
-    mesh.rotation.z = elapsedTime * 0.12;
+  smokeLayer.meshes.forEach((mesh, index) => {
+    mesh.rotation.z = elapsedTime * 0.08 + index * 0.5;
     mesh.position.z =
-      smokeLayer.positionZ + (1 + Math.sin(elapsedTime * 0.5)) * 30;
+      smokeLayer.positionZ + (1 + Math.sin(elapsedTime * 0.1)) * 30;
   });
 
   // move right to left trees using sin
