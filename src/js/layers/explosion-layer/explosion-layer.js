@@ -4,7 +4,7 @@ import Layer from '../layer';
 import { textureLoader } from '../../utils/scene-utils';
 import { env } from '../../env';
 
-class Explosion extends Layer {
+class ExplosionLayer extends Layer {
   /** @param {{cityHeight: number}} params */
   constructor({ cityHeight }) {
     super();
@@ -34,22 +34,20 @@ class Explosion extends Layer {
       side: THREE.FrontSide,
     });
 
-    const explosionMesh = this.createMesh(explosionGeometry, explosionMaterial);
+    this.setMesh(explosionGeometry, explosionMaterial);
 
-    explosionMesh.position.y =
+    this.mesh.position.y =
       explosionHeight / 2 -
       env.viewportResolution.value.height / 2 +
       cityHeight -
       env.viewportResolution.value.width * 0.1;
 
-    explosionMesh.position.z = 0;
+    this.mesh.position.z = 0;
 
     this.initialScale = env.isPortrait ? 2.0 : 1.1;
 
-    explosionMesh.scale.set(this.initialScale, this.initialScale, 1);
-
-    this.mesh = explosionMesh;
+    this.mesh.scale.set(this.initialScale, this.initialScale, 1);
   }
 }
 
-export default Explosion;
+export default ExplosionLayer;

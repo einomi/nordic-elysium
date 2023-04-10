@@ -5,7 +5,8 @@ import vertexShader from './shaders/vertex.glsl';
 import menuFragmentShader from './shaders/menu-fragment.glsl';
 import bgFragmentShader from './shaders/bg-fragment.glsl';
 import cityFragmentShader from './shaders/city-fragment.glsl';
-import Explosion from './layers/explosion/explosion';
+import ExplosionLayer from './layers/explosion-layer/explosion-layer';
+import TreesLayer from './layers/trees-layer/trees-layer';
 
 let elapsedTime = 0;
 let lastFrameTime = 0;
@@ -229,30 +230,8 @@ function handleTouchMove(_event) {
 }
 
 /***** TREES *****/
-const treesTexture = new THREE.TextureLoader().load('/trees.png');
-
-const treesGeometry = new THREE.PlaneGeometry(windowWidth, windowHeight);
-
-const treesMaterial = new THREE.MeshBasicMaterial({
-  map: treesTexture,
-  transparent: true,
-  side: THREE.FrontSide,
-});
-
-treesMaterial.map?.repeat.set(
-  1,
-  (SCENE_ASPECT_RATIO * windowHeight) / windowWidth
-);
-
-const trees = new THREE.Mesh(treesGeometry, treesMaterial);
-
-// scale up trees
-const treesScaleTo = 1.1;
-trees.scale.set(treesScaleTo, treesScaleTo, 1);
-trees.position.y = (windowHeight * (treesScaleTo - 1)) / 2;
-trees.position.z = 10;
-
-scene.add(trees);
+const treesLayer = new TreesLayer();
+scene.add(treesLayer.mesh);
 /***** END TREES *****/
 
 /***** CITY LAYER *****/
@@ -309,7 +288,7 @@ scene.add(city);
 /***** END CITY LAYER *****/
 
 /***** EXPLOSION LAYER *****/
-const explosionLayer = new Explosion({ cityHeight });
+const explosionLayer = new ExplosionLayer({ cityHeight });
 scene.add(explosionLayer.mesh);
 /***** END EXPLOSION LAYER *****/
 
@@ -364,7 +343,7 @@ function animate() {
   });
 
   // move right to left trees using sin
-  trees.position.x = -Math.sin(elapsedTime * 0.1) * 20;
+  treesLayer.mesh.position.x = -Math.sin(elapsedTime * 0.1) * 20;
 
   city.position.x = Math.sin(elapsedTime * 0.07) * 50;
 
