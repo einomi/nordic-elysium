@@ -25,12 +25,7 @@ class SmokeLayer extends LayerMultiMesh {
     // scene.background = smokeTexture;
     smokeTexture.encoding = THREE.sRGBEncoding;
 
-    const smokeMinSize = env.viewportResolution.value.height * 0.05;
-
-    const smokeSize =
-      Math.random() *
-        (smokeMinSize + env.viewportResolution.value.height * 0.2) +
-      smokeMinSize;
+    const smokeSize = env.viewportResolution.value.width * 0.1;
     const smokeGeometry = new THREE.PlaneGeometry(smokeSize, smokeSize);
     const smokeMaterial = new THREE.MeshLambertMaterial({
       map: smokeTexture,
@@ -42,7 +37,7 @@ class SmokeLayer extends LayerMultiMesh {
 
     for (let smokeIndex = 0; smokeIndex <= this.smokeCount; smokeIndex += 1) {
       const smokeMesh = this.createMesh(smokeGeometry, smokeMaterial);
-      const scale = Math.max(4, Math.random() * 9);
+      const scale = 6;
       smokeMesh.scale.set(scale, scale, scale);
 
       // stick elements to the right side of the screen
@@ -52,7 +47,7 @@ class SmokeLayer extends LayerMultiMesh {
         -env.viewportResolution.value.height / 2 + smokeSize / 2;
       smokeMesh.position.z = this.positionZ;
 
-      smokeMesh.rotation.z = Math.random() * 360;
+      // smokeMesh.rotation.z = Math.random() * 360;
       this.addMesh(smokeMesh);
     }
   }
