@@ -1,11 +1,17 @@
 ![frontenso-eleventy-starter](./src/images/frontenso-11ty-starter.png 'Title')</br>
 _by_ **[frontenso.com](https://frontenso.com)**
 
-# Nordic Elysium
+# Nordic Elysium Tech Demo
 
 A tech demo written with WebGL and GSAP.
 
-# Nunjucks + SCSS + TailwindCSS(JIT) + ESNext starter based on 11ty and Gulp 💪
+[Live Demo](https://nordic-elysium-einomi.netlify.app/)
+
+The demo is designed as a tribute to the critically acclaimed game Disco Elysium. This menu showcases a modern and elegant design, inspired by the game's unique art style, and is fully optimized for WebGL and GSAP technologies to provide a seamless and immersive user experience. If you are a fan of Disco Elysium or just looking for a visually stunning menu, I invite you to explore this tech demo and see what it has to offer.
+
+# frontenso-11ty-starter
+
+## Nunjucks + SCSS + TailwindCSS(JIT) + ESNext starter based on 11ty and Gulp 💪
 
 This starter kit is ready for production and is built on a component-based structure, utilizing the power of Nunjucks, SCSS, and TailwindCSS (with a Just-in-Time compiler), Webpack, ESNext, and live reloading.
 
