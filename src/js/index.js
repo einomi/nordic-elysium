@@ -7,6 +7,7 @@ import bgFragmentShader from './shaders/bg-fragment.glsl';
 import cityFragmentShader from './shaders/city-fragment.glsl';
 
 let elapsedTime = 0;
+let lastFrameTime = 0;
 
 const windowWidth = window.innerWidth;
 const windowHeight = window.innerHeight;
@@ -379,6 +380,12 @@ function animate() {
   requestAnimationFrame(animate);
 
   elapsedTime += clock.getDelta();
+
+  if (clock.getElapsedTime() - lastFrameTime < 1 / 25) {
+    return;
+  }
+
+  lastFrameTime = clock.getElapsedTime();
 
   menuUniforms.u_time.value = elapsedTime;
   uniformsBackground.u_time.value = elapsedTime;
