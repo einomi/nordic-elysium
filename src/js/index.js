@@ -7,6 +7,7 @@ import bgFragmentShader from './shaders/bg-fragment.glsl';
 import cityFragmentShader from './shaders/city-fragment.glsl';
 import ExplosionLayer from './layers/explosion-layer/explosion-layer';
 import TreesLayer from './layers/trees-layer/trees-layer';
+import SmokeLayer from './layers/smoke-layer/smoke-layer';
 
 let elapsedTime = 0;
 let lastFrameTime = 0;
@@ -177,40 +178,10 @@ const menu = new THREE.Mesh(menuGeometry, menuMaterial);
 menu.position.z = 2;
 scene.add(menu);
 
-const smokeTexture = new THREE.TextureLoader().load('/smoke.png');
-// scene.background = smokeTexture;
-smokeTexture.encoding = THREE.sRGBEncoding;
-
-const smokeMinSize = windowHeight * 0.05;
-
-const smokeSize =
-  Math.random() * (smokeMinSize + windowHeight * 0.2) + smokeMinSize;
-const smokeGeometry = new THREE.PlaneGeometry(smokeSize, smokeSize);
-const smokeMaterial = new THREE.MeshLambertMaterial({
-  map: smokeTexture,
-  emissive: '#eee',
-  opacity: 0.1,
-  transparent: true,
-  // wireframe: true
+const smokeLayer = new SmokeLayer();
+smokeLayer.meshes.forEach((mesh) => {
+  scene.add(mesh);
 });
-
-/** @type {THREE.Mesh[]} */
-const smokeElements = [];
-
-for (let smokeIndex = 0; smokeIndex < 3; smokeIndex += 1) {
-  const smokeElement = new THREE.Mesh(smokeGeometry, smokeMaterial);
-  const scale = Math.max(4, Math.random() * 9);
-  smokeElement.scale.set(scale, scale, scale);
-
-  // stick elements to the right side of the screen
-  smokeElement.position.x = windowWidth / 2 - (Math.random() * windowWidth) / 3;
-  smokeElement.position.y = -(Math.random() * windowHeight) / 2;
-  smokeElement.position.z = 100 + Math.random() * 100 - 50;
-
-  smokeElement.rotation.z = Math.random() * 360;
-  scene.add(smokeElement);
-  smokeElements.push(smokeElement);
-}
 
 if ('ontouchstart' in window) {
   document.addEventListener('touchmove', handleTouchMove);
@@ -338,8 +309,10 @@ function animate() {
   uniformsBackground.u_time.value = elapsedTime;
   uniformsCity.u_time.value = elapsedTime;
 
-  smokeElements.forEach((smokeElement) => {
-    smokeElement.rotation.z = elapsedTime * 0.12;
+  smokeLayer.meshes.forEach((mesh) => {
+    mesh.rotation.z = elapsedTime * 0.12;
+    mesh.position.z =
+      smokeLayer.positionZ + (1 + Math.sin(elapsedTime * 0.5)) * 30;
   });
 
   // move right to left trees using sin

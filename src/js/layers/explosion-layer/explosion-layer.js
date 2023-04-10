@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 
-import Layer from '../layer';
+import { Layer } from '../layer';
 import { textureLoader } from '../../utils/scene-utils';
 import { env } from '../../env';
 

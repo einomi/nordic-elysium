@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 
-import Layer from '../layer';
+import { Layer } from '../layer';
 import { env } from '../../env';
 
 class TreesLayer extends Layer {

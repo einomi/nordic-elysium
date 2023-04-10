@@ -1,4 +1,4 @@
-import Layer from '../layer';
+import { Layer } from '../layer';
 
 class LandscapeLayer extends Layer {
   constructor() {
