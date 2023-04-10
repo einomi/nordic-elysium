@@ -5,6 +5,7 @@ import vertexShader from './shaders/vertex.glsl';
 import menuFragmentShader from './shaders/menu-fragment.glsl';
 import bgFragmentShader from './shaders/bg-fragment.glsl';
 import cityFragmentShader from './shaders/city-fragment.glsl';
+import Explosion from './layers/explosion/explosion';
 
 let elapsedTime = 0;
 let lastFrameTime = 0;
@@ -14,7 +15,6 @@ const windowHeight = window.innerHeight;
 
 const SCENE_ASPECT_RATIO = 2136 / 1113;
 const VIEWPORT_ASPECT_RATIO = windowWidth / windowHeight;
-const IS_PORTRAIT = VIEWPORT_ASPECT_RATIO < 1;
 
 const canvas = /** @type {HTMLCanvasElement} */ (
   document.querySelector('canvas.webgl')
@@ -309,40 +309,8 @@ scene.add(city);
 /***** END CITY LAYER *****/
 
 /***** EXPLOSION LAYER *****/
-const explosionTexture = new THREE.TextureLoader().load('/explosion.png');
-const explosionTextureAspectRatio = 2136 / 514;
-
-const explosionAspectScale =
-  sceneResolution.value.y /
-  sceneResolution.value.x /
-  (resolution.value.y / resolution.value.x);
-
-const explosionHeight =
-  (SCENE_ASPECT_RATIO / explosionTextureAspectRatio) *
-  windowHeight *
-  explosionAspectScale;
-
-const explosionGeometry = new THREE.PlaneGeometry(windowWidth, explosionHeight);
-
-// standard material
-const explosionMaterial = new THREE.MeshBasicMaterial({
-  transparent: true,
-  map: explosionTexture,
-  side: THREE.FrontSide,
-});
-
-const explosion = new THREE.Mesh(explosionGeometry, explosionMaterial);
-
-explosion.position.y =
-  explosionHeight / 2 - windowHeight / 2 + cityHeight - windowWidth * 0.1;
-
-explosion.position.z = 0;
-
-const explosionScale = IS_PORTRAIT ? 2.0 : 1.1;
-
-explosion.scale.set(explosionScale, explosionScale, 1);
-
-scene.add(explosion);
+const explosionLayer = new Explosion({ cityHeight });
+scene.add(explosionLayer.mesh);
 /***** END EXPLOSION LAYER *****/
 
 animate();
@@ -401,12 +369,12 @@ function animate() {
   city.position.x = Math.sin(elapsedTime * 0.07) * 50;
 
   // move explosion
-  explosion.position.x = Math.sin(elapsedTime * 0.01) * 15;
+  explosionLayer.mesh.position.x = Math.sin(elapsedTime * 0.01) * 15;
 
   // change explosion scale
-  explosion.scale.set(
-    explosionScale + Math.sin(elapsedTime * 0.1) * 0.1,
-    explosionScale + Math.sin(elapsedTime * 0.1) * 0.1,
+  explosionLayer.mesh.scale.set(
+    explosionLayer.initialScale + Math.sin(elapsedTime * 0.1) * 0.1,
+    explosionLayer.initialScale + Math.sin(elapsedTime * 0.1) * 0.1,
     1
   );
 
