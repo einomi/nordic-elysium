@@ -1,15 +1,13 @@
 import * as THREE from 'three';
 import gsap from 'gsap';
 
-import vertexShader from './shaders/vertex.glsl';
-import bgFragmentShader from './shaders/bg-fragment.glsl';
 import ExplosionLayer from './layers/explosion-layer/explosion-layer';
 import TreesLayer from './layers/trees-layer/trees-layer';
 import SmokeLayer from './layers/smoke-layer/smoke-layer';
 import MenuLayer from './layers/menu-layer/menu-layer';
 import CityLayer from './layers/city-layer/city-layer';
+import LandscapeLayer from './layers/landscape-layer/landscape-layer';
 
-const loader = new THREE.TextureLoader();
 const scene = new THREE.Scene();
 
 let elapsedTime = 0;
@@ -21,10 +19,6 @@ const windowHeight = window.innerHeight;
 const canvas = /** @type {HTMLCanvasElement} */ (
   document.querySelector('canvas.webgl')
 );
-
-const resolution = {
-  value: new THREE.Vector2(windowWidth, windowHeight),
-};
 
 /***** MENU LAYER *****/
 const menuLayer = new MenuLayer();
@@ -104,13 +98,14 @@ const camera = new THREE.PerspectiveCamera(
 
 const cameraDistance = 600;
 camera.position.z = cameraDistance;
-// set fov as in pixels
+
+// set field of view to be able to use pixels for all sizes
 camera.fov = 2 * Math.atan(windowHeight / 2 / cameraDistance) * (180 / Math.PI);
 
 const renderer = new THREE.WebGLRenderer({
   canvas,
   antialias: true,
-  alpha: true,
+  alpha: false,
 });
 // set device pixel ratio
 renderer.setPixelRatio(window.devicePixelRatio || 1);
@@ -118,32 +113,10 @@ renderer.setSize(windowWidth, windowHeight);
 
 const clock = new THREE.Clock();
 
-// load mask texture
-const maskTexture = loader.load('/mask2.png');
-
-// load texture scenery.jpg and set it as background of the scene, use shader material
-// eslint-disable-next-line sonarjs/prefer-object-literal
-const uniformsBackground = {
-  u_texture: { value: loader.load('/scenery.jpg') },
-  u_mask: { value: maskTexture },
-  u_time: { value: 0.0 },
-  u_resolution: resolution,
-  u_mouse: { value: { x: 0.0, y: 0.0 } },
-  u_duration: { value: 8.0 },
-};
-
-const materialBackground = new THREE.ShaderMaterial({
-  uniforms: uniformsBackground,
-  vertexShader,
-  fragmentShader: bgFragmentShader,
-  transparent: false,
-  side: THREE.FrontSide,
-});
-
-const geometryBackground = new THREE.PlaneGeometry(windowWidth, windowHeight);
-
-const planeBackground = new THREE.Mesh(geometryBackground, materialBackground);
-scene.add(planeBackground);
+/***** LANDSCAPE LAYER *****/
+const landscapeLayer = new LandscapeLayer();
+scene.add(landscapeLayer.mesh);
+/***** END LANDSCAPE LAYER *****/
 
 /***** SMOKE IN RIGHT-BOTTOM CORNER *****/
 const smokeLayer = new SmokeLayer();
@@ -192,8 +165,8 @@ function onWindowResize() {
   renderer.setSize(newWindowWidth, newWindowHeight);
   menuLayer.mesh.material.uniforms.u_resolution.value.x = newWindowWidth;
   menuLayer.mesh.material.uniforms.u_resolution.value.y = newWindowHeight;
-  uniformsBackground.u_resolution.value.x = newWindowWidth;
-  uniformsBackground.u_resolution.value.y = newWindowHeight;
+  landscapeLayer.mesh.material.uniforms.u_resolution.value.x = newWindowWidth;
+  landscapeLayer.mesh.material.uniforms.u_resolution.value.y = newWindowHeight;
   cityLayer.mesh.material.uniforms.u_resolution.value.x = newWindowWidth;
   cityLayer.mesh.material.uniforms.u_resolution.value.y = newWindowHeight;
 }
@@ -205,6 +178,7 @@ function animate() {
 
   elapsedTime += clock.getDelta();
 
+  // setting FPS
   if (clock.getElapsedTime() - lastFrameTime < 1 / 25) {
     return;
   }
@@ -212,7 +186,7 @@ function animate() {
   lastFrameTime = clock.getElapsedTime();
 
   menuLayer.mesh.material.uniforms.u_time.value = elapsedTime;
-  uniformsBackground.u_time.value = elapsedTime;
+  landscapeLayer.mesh.material.uniforms.u_time.value = elapsedTime;
   cityLayer.mesh.material.uniforms.u_time.value = elapsedTime;
 
   smokeLayer.meshes.forEach((mesh, index) => {
