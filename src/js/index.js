@@ -3,11 +3,11 @@ import gsap from 'gsap';
 
 import vertexShader from './shaders/vertex.glsl';
 import bgFragmentShader from './shaders/bg-fragment.glsl';
-import cityFragmentShader from './shaders/city-fragment.glsl';
 import ExplosionLayer from './layers/explosion-layer/explosion-layer';
 import TreesLayer from './layers/trees-layer/trees-layer';
 import SmokeLayer from './layers/smoke-layer/smoke-layer';
 import MenuLayer from './layers/menu-layer/menu-layer';
+import CityLayer from './layers/city-layer/city-layer';
 
 const loader = new THREE.TextureLoader();
 const scene = new THREE.Scene();
@@ -18,19 +18,12 @@ let lastFrameTime = 0;
 const windowWidth = window.innerWidth;
 const windowHeight = window.innerHeight;
 
-const SCENE_ASPECT_RATIO = 2136 / 1113;
-const VIEWPORT_ASPECT_RATIO = windowWidth / windowHeight;
-
 const canvas = /** @type {HTMLCanvasElement} */ (
   document.querySelector('canvas.webgl')
 );
 
 const resolution = {
   value: new THREE.Vector2(windowWidth, windowHeight),
-};
-
-const sceneResolution = {
-  value: new THREE.Vector2(2136, 1113),
 };
 
 /***** MENU LAYER *****/
@@ -182,60 +175,12 @@ scene.add(treesLayer.mesh);
 /***** END TREES *****/
 
 /***** CITY LAYER *****/
-const cityTexture = new THREE.TextureLoader().load('/city.png');
-const cityAspectRatio = 2136 / 688;
-
-const cityAspectScale =
-  sceneResolution.value.y /
-  sceneResolution.value.x /
-  (resolution.value.y / resolution.value.x);
-
-const cityHeight =
-  (SCENE_ASPECT_RATIO / cityAspectRatio) * windowHeight * cityAspectScale;
-
-const cityGeometry = new THREE.PlaneGeometry(windowWidth, cityHeight);
-
-// load river-mask texture
-const riverMaskTexture = new THREE.TextureLoader().load('/river-mask.png');
-
-// load water-displacement texture
-const waterDisplacementTexture = new THREE.TextureLoader().load(
-  '/water-displacement.jpg'
-);
-
-const uniformsCity = {
-  u_texture: { value: cityTexture },
-  u_river_mask: { value: riverMaskTexture },
-  u_water_displacement: { value: waterDisplacementTexture },
-  u_time: { value: 0.0 },
-  u_resolution: resolution,
-  u_scene_resolution: sceneResolution,
-  u_scene_aspect_ratio: { value: SCENE_ASPECT_RATIO },
-  u_viewport_aspect_ratio: { value: VIEWPORT_ASPECT_RATIO },
-};
-
-const cityMaterial = new THREE.ShaderMaterial({
-  transparent: true,
-  side: THREE.FrontSide,
-  vertexShader,
-  fragmentShader: cityFragmentShader,
-  uniforms: uniformsCity,
-});
-
-const city = new THREE.Mesh(cityGeometry, cityMaterial);
-
-// move to the bottom
-city.position.y = cityHeight / 2 - windowHeight / 2;
-
-city.position.z = 1;
-
-city.scale.set(1.1, 1.1, 1);
-
-scene.add(city);
+const cityLayer = new CityLayer();
+scene.add(cityLayer.mesh);
 /***** END CITY LAYER *****/
 
 /***** EXPLOSION LAYER *****/
-const explosionLayer = new ExplosionLayer({ cityHeight });
+const explosionLayer = new ExplosionLayer({ cityHeight: cityLayer.height });
 scene.add(explosionLayer.mesh);
 /***** END EXPLOSION LAYER *****/
 
@@ -249,8 +194,8 @@ function onWindowResize() {
   menuLayer.mesh.material.uniforms.u_resolution.value.y = newWindowHeight;
   uniformsBackground.u_resolution.value.x = newWindowWidth;
   uniformsBackground.u_resolution.value.y = newWindowHeight;
-  uniformsCity.u_resolution.value.x = newWindowWidth;
-  uniformsCity.u_resolution.value.y = newWindowHeight;
+  cityLayer.mesh.material.uniforms.u_resolution.value.x = newWindowWidth;
+  cityLayer.mesh.material.uniforms.u_resolution.value.y = newWindowHeight;
 }
 
 onWindowResize();
@@ -268,7 +213,7 @@ function animate() {
 
   menuLayer.mesh.material.uniforms.u_time.value = elapsedTime;
   uniformsBackground.u_time.value = elapsedTime;
-  uniformsCity.u_time.value = elapsedTime;
+  cityLayer.mesh.material.uniforms.u_time.value = elapsedTime;
 
   smokeLayer.meshes.forEach((mesh, index) => {
     mesh.rotation.z = elapsedTime * 0.08 + index * 0.5;
@@ -278,7 +223,7 @@ function animate() {
 
   treesLayer.mesh.position.x = -Math.sin(elapsedTime * 0.1) * 20;
 
-  city.position.x = Math.sin(elapsedTime * 0.07) * 50;
+  cityLayer.mesh.position.x = Math.sin(elapsedTime * 0.07) * 50;
 
   explosionLayer.mesh.position.x = Math.sin(elapsedTime * 0.01) * 10;
 
