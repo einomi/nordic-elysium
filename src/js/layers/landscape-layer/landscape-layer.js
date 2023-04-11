@@ -1,5 +1,6 @@
 import { Layer } from '../layer';
 
+/** @extends {Layer<THREE.MeshBasicMaterial>} */
 class LandscapeLayer extends Layer {
   constructor() {
     super();

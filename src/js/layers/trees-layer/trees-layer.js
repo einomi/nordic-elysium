@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import { Layer } from '../layer';
 import { env } from '../../env';
 
+/** @extends {Layer<THREE.MeshBasicMaterial>} */
 class TreesLayer extends Layer {
   constructor() {
     super();

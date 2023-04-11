@@ -48,9 +48,9 @@ class SmokeLayer extends LayerMultiMesh {
         smokeSize / 4 +
         smokeIndex * env.viewportResolution.value.width * 0.001;
       smokeMesh.position.y =
-        -env.viewportResolution.value.height / 2 +
-        smokeSize / 2 -
-        smokeIndex * env.viewportResolution.value.height * 0.05;
+        -env.viewportResolution.value.height / 2 -
+        smokeSize / 2 +
+        smokeIndex * env.viewportResolution.value.height * 0.3;
       smokeMesh.position.z = this.positionZ;
 
       this.addMesh(smokeMesh);

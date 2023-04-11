@@ -2,12 +2,15 @@ import * as THREE from 'three';
 import gsap from 'gsap';
 
 import vertexShader from './shaders/vertex.glsl';
-import menuFragmentShader from './shaders/menu-fragment.glsl';
 import bgFragmentShader from './shaders/bg-fragment.glsl';
 import cityFragmentShader from './shaders/city-fragment.glsl';
 import ExplosionLayer from './layers/explosion-layer/explosion-layer';
 import TreesLayer from './layers/trees-layer/trees-layer';
 import SmokeLayer from './layers/smoke-layer/smoke-layer';
+import MenuLayer from './layers/menu-layer/menu-layer';
+
+const loader = new THREE.TextureLoader();
+const scene = new THREE.Scene();
 
 let elapsedTime = 0;
 let lastFrameTime = 0;
@@ -22,10 +25,6 @@ const canvas = /** @type {HTMLCanvasElement} */ (
   document.querySelector('canvas.webgl')
 );
 
-const menuBackgroundOpacity = {
-  value: 0,
-};
-
 const resolution = {
   value: new THREE.Vector2(windowWidth, windowHeight),
 };
@@ -34,14 +33,31 @@ const sceneResolution = {
   value: new THREE.Vector2(2136, 1113),
 };
 
+/***** MENU LAYER *****/
+const menuLayer = new MenuLayer();
+scene.add(menuLayer.mesh);
+/***** END MENU LAYER *****/
+
 document.addEventListener('DOMContentLoaded', () => {
   const titleEl = document.querySelector('[data-title]');
+
+  if (!titleEl) {
+    throw new Error('No title element found');
+  }
 
   const titleSource = titleEl.querySelector('[data-source]');
   const titleLetters = titleEl.querySelector('[data-letters]');
 
+  if (!titleLetters) {
+    throw new Error('No title letters found');
+  }
+
+  if (!titleSource) {
+    throw new Error('No title source found');
+  }
+
   // break into letters, get text from source and put into letters element
-  const letters = titleSource.textContent.split('');
+  const letters = (titleSource.textContent || '').split('');
   titleLetters.innerHTML = letters
     .map((letter) => `<span>${letter}</span>`)
     .join('');
@@ -61,7 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   const listItems = document.querySelectorAll('[data-list-item]');
-  gsap.to(menuBackgroundOpacity, {
+  gsap.to(menuLayer.opacity, {
     duration: 1.5,
     value: 1,
     ease: 'sine.out',
@@ -85,8 +101,6 @@ document.addEventListener('DOMContentLoaded', () => {
   );
 });
 
-const loader = new THREE.TextureLoader();
-const scene = new THREE.Scene();
 // set perspective camera
 const camera = new THREE.PerspectiveCamera(
   75,
@@ -138,50 +152,12 @@ const geometryBackground = new THREE.PlaneGeometry(windowWidth, windowHeight);
 const planeBackground = new THREE.Mesh(geometryBackground, materialBackground);
 scene.add(planeBackground);
 
-function getMenuGeometry() {
-  const isPortrait = windowHeight > windowWidth;
-  const width = isPortrait ? windowWidth : windowWidth / 1.5;
-  const height = isPortrait ? windowHeight / 1.5 : windowHeight + 100;
-
-  const menuGeometry = new THREE.PlaneGeometry(width, height);
-
-  // change position of plane to right side
-  menuGeometry.translate(windowWidth / 5, 0, 0);
-
-  return menuGeometry;
-}
-
-const menuGeometry = getMenuGeometry();
-
-// eslint-disable-next-line sonarjs/prefer-object-literal
-const menuUniforms = {
-  u_texture: { value: loader.load('/menu3.png') },
-  u_time: { value: 0.0 },
-  u_mouse: { value: { x: 0.0, y: 0.0 } },
-  u_duration: { value: 8.0 },
-  u_opacity: menuBackgroundOpacity,
-  u_resolution: resolution,
-};
-
-const menuMaterial = new THREE.ShaderMaterial({
-  uniforms: menuUniforms,
-  vertexShader,
-  fragmentShader: menuFragmentShader,
-  transparent: true,
-  side: THREE.FrontSide,
-  depthWrite: false,
-});
-
-// fix transparent invisible bug
-
-const menu = new THREE.Mesh(menuGeometry, menuMaterial);
-menu.position.z = 2;
-scene.add(menu);
-
+/***** SMOKE IN RIGHT-BOTTOM CORNER *****/
 const smokeLayer = new SmokeLayer();
 smokeLayer.meshes.forEach((mesh) => {
   scene.add(mesh);
 });
+/***** END SMOKE IN RIGHT-BOTTOM CORNER *****/
 
 if ('ontouchstart' in window) {
   document.addEventListener('touchmove', handleTouchMove);
@@ -268,24 +244,9 @@ animate();
 function onWindowResize() {
   const newWindowWidth = window.innerWidth;
   const newWindowHeight = window.innerHeight;
-
-  const aspectRatio = newWindowWidth / newWindowHeight;
-  let width, height;
-  if (aspectRatio >= 1) {
-    width = 1;
-    height = (newWindowHeight / newWindowWidth) * width;
-  } else {
-    width = aspectRatio;
-    height = 1;
-  }
-  camera.left = -width;
-  camera.right = width;
-  camera.top = height;
-  camera.bottom = -height;
-  camera.updateProjectionMatrix();
   renderer.setSize(newWindowWidth, newWindowHeight);
-  menuUniforms.u_resolution.value.x = newWindowWidth;
-  menuUniforms.u_resolution.value.y = newWindowHeight;
+  menuLayer.mesh.material.uniforms.u_resolution.value.x = newWindowWidth;
+  menuLayer.mesh.material.uniforms.u_resolution.value.y = newWindowHeight;
   uniformsBackground.u_resolution.value.x = newWindowWidth;
   uniformsBackground.u_resolution.value.y = newWindowHeight;
   uniformsCity.u_resolution.value.x = newWindowWidth;
@@ -305,7 +266,7 @@ function animate() {
 
   lastFrameTime = clock.getElapsedTime();
 
-  menuUniforms.u_time.value = elapsedTime;
+  menuLayer.mesh.material.uniforms.u_time.value = elapsedTime;
   uniformsBackground.u_time.value = elapsedTime;
   uniformsCity.u_time.value = elapsedTime;
 
@@ -315,15 +276,12 @@ function animate() {
       smokeLayer.positionZ + (1 + Math.sin(elapsedTime * 0.1)) * 30;
   });
 
-  // move right to left trees using sin
   treesLayer.mesh.position.x = -Math.sin(elapsedTime * 0.1) * 20;
 
   city.position.x = Math.sin(elapsedTime * 0.07) * 50;
 
-  // move explosion
-  explosionLayer.mesh.position.x = Math.sin(elapsedTime * 0.01) * 15;
+  explosionLayer.mesh.position.x = Math.sin(elapsedTime * 0.01) * 10;
 
-  // change explosion scale
   explosionLayer.mesh.scale.set(
     explosionLayer.initialScale + Math.sin(elapsedTime * 0.1) * 0.1,
     explosionLayer.initialScale + Math.sin(elapsedTime * 0.1) * 0.1,

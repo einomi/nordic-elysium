@@ -2,31 +2,42 @@ import * as THREE from 'three';
 
 /**
  * @param {THREE.BufferGeometry} geometry
- * @param {THREE.Material} material
- *  */
+ * @param {*} material
+ * @returns {THREE.Mesh<*, *>}
+ */
 function createMesh(geometry, material) {
   return new THREE.Mesh(geometry, material);
 }
 
 /**
+ * @template T
+ * @typedef NonArrayMaterial
+ * @type {T extends any[] ? never : T}
+ */
+
+/**
+ * @template {NonArrayMaterial<import('three').Material>} T
  * @typedef LayerType
- * @property {THREE.Mesh} mesh
+ * @property {THREE.Mesh<THREE.BufferGeometry, T>} mesh
  *  */
 
 /**
+ * @template {NonArrayMaterial<import('three').Material>} MaterialType
  * @class Layer
- * @implements {LayerType}
+ * @implements {LayerType<MaterialType>}
  */
 export class Layer {
   constructor() {
+    const material = /** @type {MaterialType} */ (new THREE.Material());
+
     // noinspection UnnecessaryLocalVariableJS
-    const nullObjectMesh = new THREE.Mesh();
+    const nullObjectMesh = new THREE.Mesh(new THREE.BufferGeometry(), material);
     this.mesh = nullObjectMesh;
   }
 
   /**
    * @param {THREE.BufferGeometry} geometry
-   * @param {THREE.Material} material
+   * @param {MaterialType} material
    *  */
   setMesh(geometry, material) {
     this.mesh = createMesh(geometry, material);
