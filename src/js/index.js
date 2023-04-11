@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-import gsap from 'gsap';
 
 import ExplosionLayer from './layers/explosion-layer/explosion-layer';
 import TreesLayer from './layers/trees-layer/trees-layer';
@@ -7,6 +6,7 @@ import SmokeLayer from './layers/smoke-layer/smoke-layer';
 import MenuLayer from './layers/menu-layer/menu-layer';
 import CityLayer from './layers/city-layer/city-layer';
 import LandscapeLayer from './layers/landscape-layer/landscape-layer';
+import { animateTextElements } from './modules/text-animation';
 
 const scene = new THREE.Scene();
 
@@ -20,75 +20,32 @@ const canvas = /** @type {HTMLCanvasElement} */ (
   document.querySelector('canvas.webgl')
 );
 
-/***** MENU LAYER *****/
+/***** LAYERS INIT *****/
 const menuLayer = new MenuLayer();
 scene.add(menuLayer.mesh);
-/***** END MENU LAYER *****/
 
-document.addEventListener('DOMContentLoaded', () => {
-  const titleEl = document.querySelector('[data-title]');
+const landscapeLayer = new LandscapeLayer();
+scene.add(landscapeLayer.mesh);
 
-  if (!titleEl) {
-    throw new Error('No title element found');
-  }
-
-  const titleSource = titleEl.querySelector('[data-source]');
-  const titleLetters = titleEl.querySelector('[data-letters]');
-
-  if (!titleLetters) {
-    throw new Error('No title letters found');
-  }
-
-  if (!titleSource) {
-    throw new Error('No title source found');
-  }
-
-  // break into letters, get text from source and put into letters element
-  const letters = (titleSource.textContent || '').split('');
-  titleLetters.innerHTML = letters
-    .map((letter) => `<span>${letter}</span>`)
-    .join('');
-
-  // get spans
-  const spans = titleLetters.querySelectorAll('span');
-
-  gsap.set(titleLetters, { alpha: 1 });
-  gsap.set(spans, { alpha: 0 });
-
-  gsap.to(spans, {
-    duration: 1.5,
-    alpha: 1,
-    ease: 'sine.out',
-    stagger: 0.05,
-    delay: 0.3,
-  });
-
-  const listItems = document.querySelectorAll('[data-list-item]');
-  gsap.to(menuLayer.opacity, {
-    duration: 1.5,
-    value: 1,
-    ease: 'sine.out',
-    delay: 0.3,
-  });
-
-  gsap.fromTo(
-    listItems,
-    {
-      autoAlpha: 0,
-      x: 20,
-    },
-    {
-      duration: 1,
-      autoAlpha: 1,
-      x: 0,
-      stagger: 0.15,
-      ease: 'sine.out',
-      delay: 0.3,
-    }
-  );
+const smokeLayer = new SmokeLayer();
+smokeLayer.meshes.forEach((mesh) => {
+  scene.add(mesh);
 });
 
-// set perspective camera
+const treesLayer = new TreesLayer();
+scene.add(treesLayer.mesh);
+
+const cityLayer = new CityLayer();
+scene.add(cityLayer.mesh);
+
+const explosionLayer = new ExplosionLayer({ cityHeight: cityLayer.height });
+scene.add(explosionLayer.mesh);
+/***** END LAYERS INIT *****/
+
+document.addEventListener('DOMContentLoaded', () => {
+  animateTextElements(menuLayer);
+});
+
 const camera = new THREE.PerspectiveCamera(
   75,
   windowWidth / windowHeight,
@@ -107,23 +64,10 @@ const renderer = new THREE.WebGLRenderer({
   antialias: true,
   alpha: false,
 });
-// set device pixel ratio
 renderer.setPixelRatio(window.devicePixelRatio || 1);
 renderer.setSize(windowWidth, windowHeight);
 
 const clock = new THREE.Clock();
-
-/***** LANDSCAPE LAYER *****/
-const landscapeLayer = new LandscapeLayer();
-scene.add(landscapeLayer.mesh);
-/***** END LANDSCAPE LAYER *****/
-
-/***** SMOKE IN RIGHT-BOTTOM CORNER *****/
-const smokeLayer = new SmokeLayer();
-smokeLayer.meshes.forEach((mesh) => {
-  scene.add(mesh);
-});
-/***** END SMOKE IN RIGHT-BOTTOM CORNER *****/
 
 if ('ontouchstart' in window) {
   document.addEventListener('touchmove', handleTouchMove);
@@ -141,21 +85,6 @@ function handleMouseMove(_event) {
 function handleTouchMove(_event) {
   // pass
 }
-
-/***** TREES *****/
-const treesLayer = new TreesLayer();
-scene.add(treesLayer.mesh);
-/***** END TREES *****/
-
-/***** CITY LAYER *****/
-const cityLayer = new CityLayer();
-scene.add(cityLayer.mesh);
-/***** END CITY LAYER *****/
-
-/***** EXPLOSION LAYER *****/
-const explosionLayer = new ExplosionLayer({ cityHeight: cityLayer.height });
-scene.add(explosionLayer.mesh);
-/***** END EXPLOSION LAYER *****/
 
 animate();
 
@@ -200,7 +129,6 @@ function animate() {
   cityLayer.mesh.position.x = Math.sin(elapsedTime * 0.07) * 50;
 
   explosionLayer.mesh.position.x = Math.sin(elapsedTime * 0.01) * 10;
-
   explosionLayer.mesh.scale.set(
     explosionLayer.initialScale + Math.sin(elapsedTime * 0.1) * 0.1,
     explosionLayer.initialScale + Math.sin(elapsedTime * 0.1) * 0.1,
