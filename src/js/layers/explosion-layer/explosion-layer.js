@@ -12,6 +12,7 @@ class ExplosionLayer extends Layer {
     super();
 
     this.cityLayer = cityLayer;
+    this.initialY = 0;
 
     const explosionTexture = textureLoader.load('/explosion.png');
 
@@ -67,11 +68,12 @@ class ExplosionLayer extends Layer {
   }
 
   setPositionY() {
-    this.mesh.position.y =
+    this.initialY =
       this.height / 2 -
       env.viewportResolution.value.height / 2 +
       this.cityLayer.height -
       env.viewportResolution.value.width * 0.07;
+    this.mesh.position.y = this.initialY;
   }
 
   update() {

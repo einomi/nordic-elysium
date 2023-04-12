@@ -62,7 +62,9 @@ class CityLayer extends Layer {
 
     this.mesh.position.z = 1;
 
-    this.mesh.scale.set(1.2, 1.2, 1);
+    this.initialScale = 1.2;
+
+    this.mesh.scale.set(this.initialScale, this.initialScale, 1);
 
     this.moveToBottom();
   }

@@ -130,12 +130,21 @@ function animate() {
 
   treesLayer.mesh.position.x = -Math.sin(elapsedTime * 0.1) * 20;
 
-  cityLayer.mesh.position.x = Math.sin(elapsedTime * 0.05) * 40;
+  cityLayer.mesh.position.x = Math.sin(elapsedTime * 0.075) * 40;
 
-  explosionLayer.mesh.position.x = Math.sin(elapsedTime * 0.01) * 10;
+  // animate city scale
+  cityLayer.mesh.scale.set(
+    cityLayer.initialScale + Math.sin(elapsedTime * 0.1) * 0.05,
+    cityLayer.initialScale + Math.sin(elapsedTime * 0.1) * 0.05,
+    1
+  );
+
+  explosionLayer.mesh.position.x = Math.sin(elapsedTime * 0.01) * 20;
+  explosionLayer.mesh.position.y =
+    explosionLayer.initialY + Math.sin(elapsedTime * 0.15) * 10;
   explosionLayer.mesh.scale.set(
-    explosionLayer.initialScale + Math.sin(elapsedTime * 0.1) * 0.1,
-    explosionLayer.initialScale + Math.sin(elapsedTime * 0.1) * 0.1,
+    explosionLayer.initialScale + Math.sin(elapsedTime * 0.15) * 0.12,
+    explosionLayer.initialScale + Math.sin(elapsedTime * 0.15) * 0.12,
     1
   );
 
