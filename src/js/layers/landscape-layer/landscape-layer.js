@@ -12,7 +12,7 @@ class LandscapeLayer extends Layer {
   constructor() {
     super();
 
-    const maskTexture = textureLoader.load('/mask2.png');
+    const maskTexture = textureLoader.load('/mask.png');
 
     const uniformsBackground = {
       u_texture: { value: textureLoader.load('/scenery.jpg') },

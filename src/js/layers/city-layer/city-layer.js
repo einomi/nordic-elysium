@@ -35,10 +35,10 @@ class CityLayer extends Layer {
     this.geometry = this.getGeometry();
 
     // load river-mask texture
-    const riverMaskTexture = new THREE.TextureLoader().load('/river-mask.png');
+    const riverMaskTexture = textureLoader.load('/river-mask.png');
 
     // load water-displacement texture
-    const waterDisplacementTexture = new THREE.TextureLoader().load(
+    const waterDisplacementTexture = textureLoader.load(
       '/water-displacement.jpg'
     );
 

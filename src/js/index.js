@@ -133,8 +133,6 @@ function handleTouchMove(_event) {
     -(_event.touches[0].clientY / env.viewportResolution.value.height) * 2 + 1;
 }
 
-animate();
-
 eventEmitter.on('envUpdated', () => {
   renderer.setSize(
     env.viewportResolution.value.width,
@@ -193,3 +191,5 @@ function animate() {
 
   renderer.render(scene, camera);
 }
+
+animate();

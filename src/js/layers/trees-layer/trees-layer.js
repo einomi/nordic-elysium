@@ -2,13 +2,14 @@ import * as THREE from 'three';
 
 import { Layer } from '../layer';
 import { env } from '../../env';
+import { textureLoader } from '../../utils/scene-utils';
 
 /** @extends {Layer<THREE.MeshBasicMaterial>} */
 class TreesLayer extends Layer {
   constructor() {
     super();
 
-    const treesTexture = new THREE.TextureLoader().load('/trees.png');
+    const treesTexture = textureLoader.load('/trees.png');
 
     this.geometry = new THREE.PlaneGeometry(
       env.viewportResolution.value.width,

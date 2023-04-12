@@ -3,11 +3,9 @@
 {% block content %}
   {% set items = ['New Game', 'Load Game', 'Options', 'Exit'] %}
 
-  <div>
-    {# <img class="fixed w-full h-full left-0 top-0 object-cover" #}
-    {# src="/scenery.jpg" #}
-    {# alt="" /> #}
+  <div class="w-full overflow-hidden">
     <canvas class="fixed webgl" data-canvas></canvas>
+
     <h1 class="absolute left-[3vw] lg:left-[5vw] bottom-[60px] uppercase text-[#eee] text-[4.4vw] lg:text-[3.6vw] tracking-[0.07em] font-bold select-none"
       data-title>
       <span class="opacity-0" data-source>Nordic Elysium</span>
@@ -17,7 +15,7 @@
 
       </span>
     </h1>
-    <ul class="absolute right-[5vw] top-1/2 lg:top-[30vh] -translate-y-1/2 lg:translate-y-0 text-[4vw] lg:text-[2.5vw] text-[#333] text-right select-none">
+    <ul class="absolute right-[5vw] top-[42%] lg:top-[30%] -translate-y-1/2 lg:translate-y-0 text-[4vw] lg:text-[2.5vw] text-[#333] text-right select-none">
       {% for item in items %}
         <li class="mb-[0.4em] opacity-0 invisible" data-list-item>
           <button href="#"
@@ -28,5 +26,17 @@
         </li>
       {% endfor %}
     </ul>
+  </div>
+  <div class="loader" data-loader>
+    {% image './src/images/loader-bg.jpg',
+      {
+        alt: '',
+        class: 'loader__image'
+      },
+      2560
+    %}
+    <div class="loader__text" data-loader-text>
+      Loading...
+    </div>
   </div>
 {% endblock %}

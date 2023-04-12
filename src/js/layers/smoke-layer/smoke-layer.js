@@ -2,6 +2,7 @@ import * as THREE from 'three';
 
 import { LayerMultiMesh } from '../layer-multi-mesh';
 import { env } from '../../env';
+import { textureLoader } from '../../utils/scene-utils';
 
 // create type using jsdoc
 /**
@@ -21,7 +22,7 @@ class SmokeLayer extends LayerMultiMesh {
     this.smokeCount = 2;
     this.positionZ = 11;
 
-    const smokeTexture = new THREE.TextureLoader().load('/smoke.png');
+    const smokeTexture = textureLoader.load('/smoke.png');
     // scene.background = smokeTexture;
     smokeTexture.encoding = THREE.sRGBEncoding;
 

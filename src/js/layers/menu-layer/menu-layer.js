@@ -22,7 +22,7 @@ class MenuLayer extends Layer {
 
     // eslint-disable-next-line sonarjs/prefer-object-literal
     const menuUniforms = {
-      u_texture: { value: textureLoader.load('/menu3.png') },
+      u_texture: { value: textureLoader.load('/menu.png') },
       u_time: { value: 0.0 },
       u_mouse: { value: { x: 0.0, y: 0.0 } },
       u_duration: { value: 8.0 },
@@ -57,7 +57,11 @@ class MenuLayer extends Layer {
     const geometry = new THREE.PlaneGeometry(width, height);
 
     // change position of plane to right side
-    geometry.translate(env.viewportResolution.value.width / 5, 0, 0);
+    geometry.translate(
+      env.viewportResolution.value.width / 5,
+      env.viewportResolution.value.height / 12,
+      0
+    );
 
     return geometry;
   }
