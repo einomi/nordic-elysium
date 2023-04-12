@@ -10,31 +10,49 @@ class TreesLayer extends Layer {
 
     const treesTexture = new THREE.TextureLoader().load('/trees.png');
 
-    const treesGeometry = new THREE.PlaneGeometry(
+    this.geometry = new THREE.PlaneGeometry(
       env.viewportResolution.value.width,
       env.viewportResolution.value.height
     );
 
-    const treesMaterial = new THREE.MeshBasicMaterial({
+    this.material = new THREE.MeshBasicMaterial({
       map: treesTexture,
       transparent: true,
       side: THREE.FrontSide,
     });
 
-    treesMaterial.map?.repeat.set(
+    this.setTextureRepeat();
+
+    this.setMesh(this.geometry, this.material);
+
+    this.treesScaleTo = 1.1;
+    this.setSetScale();
+    this.setPositionY();
+    this.mesh.position.z = 10;
+  }
+
+  setSetScale() {
+    this.mesh.scale.set(this.treesScaleTo, this.treesScaleTo, 1);
+  }
+
+  setPositionY() {
+    this.mesh.position.y =
+      (env.viewportResolution.value.height * (this.treesScaleTo - 1)) / 2;
+  }
+
+  setTextureRepeat() {
+    this.material.map?.repeat.set(
       1,
       (env.designAspectRatio * env.viewportResolution.value.height) /
         env.viewportResolution.value.width
     );
+  }
 
-    this.setMesh(treesGeometry, treesMaterial);
-
-    // scale up trees
-    const treesScaleTo = 1.1;
-    this.mesh.scale.set(treesScaleTo, treesScaleTo, 1);
-    this.mesh.position.y =
-      (env.viewportResolution.value.height * (treesScaleTo - 1)) / 2;
-    this.mesh.position.z = 10;
+  update() {
+    super.update();
+    this.setTextureRepeat();
+    this.setSetScale();
+    this.setPositionY();
   }
 }
 

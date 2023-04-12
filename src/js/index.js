@@ -7,14 +7,13 @@ import MenuLayer from './layers/menu-layer/menu-layer';
 import CityLayer from './layers/city-layer/city-layer';
 import LandscapeLayer from './layers/landscape-layer/landscape-layer';
 import { animateTextElements } from './modules/text-animation';
+import { env } from './env';
+import eventEmitter from './event-emitter';
 
 const scene = new THREE.Scene();
 
 let elapsedTime = 0;
 let lastFrameTime = 0;
-
-const windowWidth = window.innerWidth;
-const windowHeight = window.innerHeight;
 
 const canvas = /** @type {HTMLCanvasElement} */ (
   document.querySelector('canvas.webgl')
@@ -38,7 +37,7 @@ scene.add(treesLayer.mesh);
 const cityLayer = new CityLayer();
 scene.add(cityLayer.mesh);
 
-const explosionLayer = new ExplosionLayer({ cityHeight: cityLayer.height });
+const explosionLayer = new ExplosionLayer({ cityLayer });
 scene.add(explosionLayer.mesh);
 /***** END LAYERS INIT *****/
 
@@ -46,18 +45,23 @@ document.addEventListener('DOMContentLoaded', () => {
   animateTextElements(menuLayer);
 });
 
-const camera = new THREE.PerspectiveCamera(
-  75,
-  windowWidth / windowHeight,
-  0.1,
-  1000
-);
+const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
 
-const cameraDistance = 600;
-camera.position.z = cameraDistance;
+function updateCamera() {
+  const cameraDistance = 600;
+  // set aspect
+  camera.aspect =
+    env.viewportResolution.value.width / env.viewportResolution.value.height;
+  // set field of view to be able to use pixels for all sizes
+  camera.fov =
+    2 *
+    Math.atan(env.viewportResolution.value.height / 2 / cameraDistance) *
+    (180 / Math.PI);
+  camera.position.z = cameraDistance;
+  camera.updateProjectionMatrix();
+}
 
-// set field of view to be able to use pixels for all sizes
-camera.fov = 2 * Math.atan(windowHeight / 2 / cameraDistance) * (180 / Math.PI);
+updateCamera();
 
 const renderer = new THREE.WebGLRenderer({
   canvas,
@@ -65,14 +69,16 @@ const renderer = new THREE.WebGLRenderer({
   alpha: false,
 });
 renderer.setPixelRatio(window.devicePixelRatio || 1);
-renderer.setSize(windowWidth, windowHeight);
+renderer.setSize(
+  env.viewportResolution.value.width,
+  env.viewportResolution.value.height
+);
 
 const clock = new THREE.Clock();
 
 if ('ontouchstart' in window) {
   document.addEventListener('touchmove', handleTouchMove);
 } else {
-  window.addEventListener('resize', onWindowResize, false);
   document.addEventListener('mousemove', handleMouseMove);
 }
 
@@ -88,19 +94,17 @@ function handleTouchMove(_event) {
 
 animate();
 
-function onWindowResize() {
-  const newWindowWidth = window.innerWidth;
-  const newWindowHeight = window.innerHeight;
-  renderer.setSize(newWindowWidth, newWindowHeight);
-  menuLayer.mesh.material.uniforms.u_resolution.value.x = newWindowWidth;
-  menuLayer.mesh.material.uniforms.u_resolution.value.y = newWindowHeight;
-  landscapeLayer.mesh.material.uniforms.u_resolution.value.x = newWindowWidth;
-  landscapeLayer.mesh.material.uniforms.u_resolution.value.y = newWindowHeight;
-  cityLayer.mesh.material.uniforms.u_resolution.value.x = newWindowWidth;
-  cityLayer.mesh.material.uniforms.u_resolution.value.y = newWindowHeight;
-}
+eventEmitter.on('envUpdated', () => {
+  renderer.setSize(
+    env.viewportResolution.value.width,
+    env.viewportResolution.value.height
+  );
 
-onWindowResize();
+  updateCamera();
+
+  cityLayer.mesh.material.uniforms.u_resolution = env.viewportResolution;
+  eventEmitter.emit('updateLayers');
+});
 
 function animate() {
   requestAnimationFrame(animate);

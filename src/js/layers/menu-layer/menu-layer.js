@@ -18,26 +18,7 @@ class MenuLayer extends Layer {
       value: 0,
     };
 
-    function getMenuGeometry() {
-      const isPortrait =
-        env.viewportResolution.value.height >
-        env.viewportResolution.value.width;
-      const width = isPortrait
-        ? env.viewportResolution.value.width
-        : env.viewportResolution.value.width / 1.5;
-      const height = isPortrait
-        ? env.viewportResolution.value.height / 1.5
-        : env.viewportResolution.value.height + 100;
-
-      const menuGeometry = new THREE.PlaneGeometry(width, height);
-
-      // change position of plane to right side
-      menuGeometry.translate(env.viewportResolution.value.width / 5, 0, 0);
-
-      return menuGeometry;
-    }
-
-    const menuGeometry = getMenuGeometry();
+    this.geometry = this.getGeometry();
 
     // eslint-disable-next-line sonarjs/prefer-object-literal
     const menuUniforms = {
@@ -58,8 +39,26 @@ class MenuLayer extends Layer {
       depthWrite: false,
     });
 
-    this.setMesh(menuGeometry, menuMaterial);
+    this.setMesh(this.geometry, menuMaterial);
     this.mesh.position.z = 2;
+  }
+
+  getGeometry() {
+    const isPortrait =
+      env.viewportResolution.value.height > env.viewportResolution.value.width;
+    const width = isPortrait
+      ? env.viewportResolution.value.width
+      : env.viewportResolution.value.width / 1.5;
+    const height = isPortrait
+      ? env.viewportResolution.value.height / 1.5
+      : env.viewportResolution.value.height + 100;
+
+    const geometry = new THREE.PlaneGeometry(width, height);
+
+    // change position of plane to right side
+    geometry.translate(env.viewportResolution.value.width / 5, 0, 0);
+
+    return geometry;
   }
 }
 

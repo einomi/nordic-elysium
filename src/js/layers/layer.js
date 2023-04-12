@@ -1,11 +1,14 @@
 import * as THREE from 'three';
 
+import eventEmitter from '../event-emitter';
+import { env } from '../env';
+
 /**
  * @param {THREE.BufferGeometry} geometry
  * @param {*} material
  * @returns {THREE.Mesh<*, *>}
  */
-function createMesh(geometry, material) {
+export function createMesh(geometry, material) {
   return new THREE.Mesh(geometry, material);
 }
 
@@ -19,10 +22,11 @@ function createMesh(geometry, material) {
  * @template {NonArrayMaterial<import('three').Material>} T
  * @typedef LayerType
  * @property {THREE.Mesh<THREE.BufferGeometry, T>} mesh
+ * @property {THREE.BufferGeometry} geometry
  *  */
 
 /**
- * @template {NonArrayMaterial<import('three').Material>} MaterialType
+ * @template {NonArrayMaterial<import('three').Material | import('three').ShaderMaterial>} MaterialType
  * @class Layer
  * @implements {LayerType<MaterialType>}
  */
@@ -33,6 +37,14 @@ export class Layer {
     // noinspection UnnecessaryLocalVariableJS
     const nullObjectMesh = new THREE.Mesh(new THREE.BufferGeometry(), material);
     this.mesh = nullObjectMesh;
+
+    // noinspection UnnecessaryLocalVariableJS
+    const nullObjectGeometry = new THREE.BufferGeometry();
+    this.geometry = nullObjectGeometry;
+
+    eventEmitter.on('updateLayers', () => {
+      this?.update();
+    });
   }
 
   /**
@@ -42,34 +54,21 @@ export class Layer {
   setMesh(geometry, material) {
     this.mesh = createMesh(geometry, material);
   }
-}
 
-/** @typedef LayerMultiMeshType
- * @property {THREE.Mesh[]} meshes[]
- * */
-
-/**
- * @class LayerMultiMesh
- * @implements {LayerMultiMeshType}
- */
-export class LayerMultiMesh {
-  constructor() {
-    /** @type {THREE.Mesh[]} */
-    this.meshes = [];
+  getGeometry() {
+    return new THREE.PlaneGeometry(
+      env.viewportResolution.value.width,
+      env.viewportResolution.value.height
+    );
   }
 
-  /**
-   * @param {THREE.BufferGeometry} geometry
-   * @param {THREE.Material} material
-   */
-  createMesh(geometry, material) {
-    return createMesh(geometry, material);
-  }
+  update() {
+    this.geometry.dispose();
+    this.geometry = this.getGeometry();
+    this.mesh.geometry = this.geometry;
 
-  /**
-   * @param {THREE.Mesh} mesh
-   */
-  addMesh(mesh) {
-    this.meshes.push(mesh);
+    if (this.mesh.material instanceof THREE.ShaderMaterial) {
+      this.mesh.material.uniforms.u_resolution = env.viewportResolution;
+    }
   }
 }

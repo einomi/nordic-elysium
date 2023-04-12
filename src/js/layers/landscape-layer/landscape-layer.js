@@ -23,7 +23,7 @@ class LandscapeLayer extends Layer {
       u_duration: { value: 8.0 },
     };
 
-    const materialBackground = new THREE.ShaderMaterial({
+    const material = new THREE.ShaderMaterial({
       uniforms: uniformsBackground,
       vertexShader,
       fragmentShader: bgFragmentShader,
@@ -31,12 +31,12 @@ class LandscapeLayer extends Layer {
       side: THREE.FrontSide,
     });
 
-    const geometryBackground = new THREE.PlaneGeometry(
+    this.geometry = new THREE.PlaneGeometry(
       env.viewportResolution.value.width,
       env.viewportResolution.value.height
     );
 
-    this.setMesh(geometryBackground, materialBackground);
+    this.setMesh(this.geometry, material);
   }
 }
 

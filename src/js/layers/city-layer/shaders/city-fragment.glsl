@@ -6,12 +6,10 @@ uniform sampler2D u_texture;
 uniform sampler2D u_river_mask;
 uniform float u_time;
 uniform vec2 u_resolution;
-uniform vec2 u_scene_resolution;
 uniform sampler2D u_water_displacement;
 
 //	Classic Perlin 2D Noise
 //	by Stefan Gustavson
-//
 vec4 permute(vec4 x) {
   return mod((x * 34.0 + 1.0) * x, 289.0);
 }
@@ -63,12 +61,6 @@ void main() {
   vec2 uv = v_uv;
 
   float scaleAspect = u_resolution.x < u_resolution.y ? 1.5 : 1.0;
-
-  // fit scene to screen with correct aspect ratio
-  //  uv.x = scaleAspect * u_resolution.x / u_scene_resolution.x * uv.x;
-  //  uv.y = scaleAspect * u_resolution.y / u_scene_resolution.y * uv.y;
-  //  uv.x =
-  //    uv.x - (scaleAspect * u_resolution.x / u_scene_resolution.x - 1.0) / 2.0;
 
   vec4 river_mask = texture2D(u_river_mask, uv);
   float river_mask_value = river_mask.r;

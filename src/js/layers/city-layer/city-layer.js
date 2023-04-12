@@ -4,32 +4,35 @@ import { Layer } from '../layer';
 import { textureLoader } from '../../utils/scene-utils';
 import { env } from '../../env';
 import vertexShader from '../../shaders/vertex.glsl';
+import eventEmitter from '../../event-emitter';
 
 import cityFragmentShader from './shaders/city-fragment.glsl';
 
-/** @extends {Layer<THREE.ShaderMaterial>} */
+/**
+ * @typedef {Object} CityLayerType
+ * @property {THREE.PlaneGeometry} geometry
+ * @property {number} height
+ * @property {number} cityAspectRatio
+ * @property {THREE.ShaderMaterial} material
+ * @property {THREE.Mesh} mesh
+ * @property {() => THREE.PlaneGeometry} getGeometry
+ * @property {() => number} getHeight
+ */
+
+/**
+ * @extends {Layer<THREE.ShaderMaterial>}
+ * @implements {CityLayerType}
+ *  */
 class CityLayer extends Layer {
   constructor() {
     super();
 
     const cityTexture = textureLoader.load('/city.png');
-    const cityAspectRatio = 2136 / 688;
+    this.cityAspectRatio = 2136 / 688;
 
-    const cityAspectScale =
-      env.designResolution.value.height /
-      env.designResolution.value.width /
-      (env.viewportResolution.value.height /
-        env.viewportResolution.value.width);
-
-    this.height =
-      (env.designAspectRatio / cityAspectRatio) *
-      env.viewportResolution.value.height *
-      cityAspectScale;
-
-    const cityGeometry = new THREE.PlaneGeometry(
-      env.viewportResolution.value.width,
-      this.height
-    );
+    this.height = -1;
+    this.updateHeight();
+    this.geometry = this.getGeometry();
 
     // load river-mask texture
     const riverMaskTexture = new THREE.TextureLoader().load('/river-mask.png');
@@ -45,12 +48,9 @@ class CityLayer extends Layer {
       u_water_displacement: { value: waterDisplacementTexture },
       u_time: { value: 0.0 },
       u_resolution: env.viewportResolution,
-      u_scene_resolution: env.designResolution,
-      u_scene_aspect_ratio: { value: env.designAspectRatio },
-      u_viewport_aspect_ratio: { value: env.viewportAspectRatio },
     };
 
-    const cityMaterial = new THREE.ShaderMaterial({
+    this.material = new THREE.ShaderMaterial({
       transparent: true,
       side: THREE.FrontSide,
       vertexShader,
@@ -58,15 +58,50 @@ class CityLayer extends Layer {
       uniforms: uniformsCity,
     });
 
-    this.setMesh(cityGeometry, cityMaterial);
-
-    // move to the bottom
-    this.mesh.position.y =
-      this.height / 2 - env.viewportResolution.value.height / 2;
+    this.setMesh(this.geometry, this.material);
 
     this.mesh.position.z = 1;
 
     this.mesh.scale.set(1.1, 1.1, 1);
+
+    this.moveToBottom();
+  }
+
+  getHeight() {
+    const cityAspectScale =
+      env.designResolution.value.height /
+      env.designResolution.value.width /
+      (env.viewportResolution.value.height /
+        env.viewportResolution.value.width);
+
+    return (
+      (env.designAspectRatio / this.cityAspectRatio) *
+      env.viewportResolution.value.height *
+      cityAspectScale
+    );
+  }
+
+  updateHeight() {
+    this.height = this.getHeight();
+    eventEmitter.emit('cityHeightChange');
+  }
+
+  getGeometry() {
+    return new THREE.PlaneGeometry(
+      env.viewportResolution.value.width,
+      this.height
+    );
+  }
+
+  moveToBottom() {
+    this.mesh.position.y =
+      this.height / 2 - env.viewportResolution.value.height / 2;
+  }
+
+  update() {
+    this.updateHeight();
+    super.update();
+    this.moveToBottom();
   }
 }
 

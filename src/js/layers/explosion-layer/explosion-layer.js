@@ -3,31 +3,20 @@ import * as THREE from 'three';
 import { Layer } from '../layer';
 import { textureLoader } from '../../utils/scene-utils';
 import { env } from '../../env';
+import eventEmitter from '../../event-emitter';
 
 /** @extends {Layer<THREE.MeshBasicMaterial>} */
 class ExplosionLayer extends Layer {
-  /** @param {{cityHeight: number}} params */
-  constructor({ cityHeight }) {
+  /** @param {{cityLayer: import('../city-layer/city-layer').default}} params */
+  constructor({ cityLayer }) {
     super();
 
+    this.cityLayer = cityLayer;
+
     const explosionTexture = textureLoader.load('/explosion.png');
-    const explosionTextureAspectRatio = env.designResolution.value.width / 514;
 
-    const explosionAspectScale =
-      env.designResolution.value.height /
-      env.designResolution.value.width /
-      (env.viewportResolution.value.height /
-        env.viewportResolution.value.width);
-
-    const explosionHeight =
-      (env.designAspectRatio / explosionTextureAspectRatio) *
-      env.viewportResolution.value.height *
-      explosionAspectScale;
-
-    const explosionGeometry = new THREE.PlaneGeometry(
-      env.viewportResolution.value.width,
-      explosionHeight
-    );
+    this.height = this.getHeight();
+    this.geometry = this.getGeometry();
 
     const explosionMaterial = new THREE.MeshBasicMaterial({
       transparent: true,
@@ -35,19 +24,62 @@ class ExplosionLayer extends Layer {
       side: THREE.FrontSide,
     });
 
-    this.setMesh(explosionGeometry, explosionMaterial);
-
-    this.mesh.position.y =
-      explosionHeight / 2 -
-      env.viewportResolution.value.height / 2 +
-      cityHeight -
-      env.viewportResolution.value.width * 0.07;
+    this.setMesh(this.geometry, explosionMaterial);
 
     this.mesh.position.z = 0;
 
-    this.initialScale = env.isPortrait ? 2.0 : 1.5;
+    this.initialScale = this.getInitialScale();
+    this.setScale();
 
+    this.setPositionY();
+    eventEmitter.on('cityHeightChange', () => {
+      this.setPositionY();
+    });
+  }
+
+  getHeight() {
+    const explosionTextureAspectRatio = env.designResolution.value.width / 514;
+    const explosionAspectScale =
+      env.designResolution.value.height /
+      env.designResolution.value.width /
+      (env.viewportResolution.value.height /
+        env.viewportResolution.value.width);
+    return (
+      (env.designAspectRatio / explosionTextureAspectRatio) *
+      env.viewportResolution.value.height *
+      explosionAspectScale
+    );
+  }
+
+  getGeometry() {
+    return new THREE.PlaneGeometry(
+      env.viewportResolution.value.width,
+      this.height
+    );
+  }
+
+  getInitialScale() {
+    return env.isPortrait ? 2.0 : 1.5;
+  }
+
+  setScale() {
     this.mesh.scale.set(this.initialScale, this.initialScale, 1);
+  }
+
+  setPositionY() {
+    this.mesh.position.y =
+      this.height / 2 -
+      env.viewportResolution.value.height / 2 +
+      this.cityLayer.height -
+      env.viewportResolution.value.width * 0.07;
+  }
+
+  update() {
+    this.height = this.getHeight();
+    super.update();
+    this.setPositionY();
+    this.initialScale = this.getInitialScale();
+    this.setScale();
   }
 }
 

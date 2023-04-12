@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 
-import { throttle } from './utils/throttle';
+import eventEmitter from './event-emitter';
+import { debounce } from './utils/debounce';
 
 /**
  * @typedef {Object} EnvType
@@ -43,9 +44,10 @@ class Env {
 
     window.addEventListener(
       'resize',
-      throttle(() => {
+      debounce(() => {
         updateEnvValues();
-      }, 100)
+        eventEmitter.emit('envUpdated');
+      }, 50)
     );
   }
 }
