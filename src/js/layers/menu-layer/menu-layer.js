@@ -30,7 +30,7 @@ class MenuLayer extends Layer {
       u_resolution: env.viewportResolution,
     };
 
-    const menuMaterial = new THREE.ShaderMaterial({
+    this.material = new THREE.ShaderMaterial({
       uniforms: menuUniforms,
       vertexShader,
       fragmentShader: menuFragmentShader,
@@ -39,7 +39,7 @@ class MenuLayer extends Layer {
       depthWrite: false,
     });
 
-    this.setMesh(this.geometry, menuMaterial);
+    this.setMesh(this.geometry, this.material);
     this.mesh.position.z = 2;
   }
 
@@ -60,6 +60,10 @@ class MenuLayer extends Layer {
 
     return geometry;
   }
+
+  // update() {
+  //   super.update();
+  // }
 }
 
 export default MenuLayer;
