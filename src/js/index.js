@@ -53,24 +53,31 @@ document.addEventListener('DOMContentLoaded', () => {
   // add timeout id type using jsdoc
   /** @type {resultOf<setTimeout>} */
   let timeoutId = null;
+  let multiplier = 0;
   menuButtons.forEach((button) => {
     button.addEventListener('click', () => {
       clearTimeout(timeoutId);
       gsap.to(menuLayer.mesh.material.uniforms.u_inflate, {
-        value: 2,
+        value: 2 + multiplier,
         duration: 0.25,
-        ease: 'power3.out',
+        ease: 'power1.out',
         overwrite: true,
       });
+      multiplier = multiplier < 4 ? multiplier + 1 : multiplier;
       // eslint-disable-next-line max-nested-callbacks
       timeoutId = setTimeout(() => {
         gsap.to(menuLayer.mesh.material.uniforms.u_inflate, {
           value: 0,
-          duration: 0.7,
+          duration: 0.55,
           ease: 'sine.in',
           overwrite: true,
         });
-      }, 220);
+      }, 250);
+
+      // eslint-disable-next-line max-nested-callbacks
+      setTimeout(() => {
+        multiplier = 0;
+      }, 800);
     });
   });
 });
