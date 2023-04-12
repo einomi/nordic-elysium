@@ -28,6 +28,7 @@ class MenuLayer extends Layer {
       u_duration: { value: 8.0 },
       u_opacity: this.opacity,
       u_resolution: env.viewportResolution,
+      u_inflate: { value: 0 },
     };
 
     this.material = new THREE.ShaderMaterial({

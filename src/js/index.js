@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import gsap from 'gsap';
 
 import ExplosionLayer from './layers/explosion-layer/explosion-layer';
 import TreesLayer from './layers/trees-layer/trees-layer';
@@ -14,6 +15,8 @@ const scene = new THREE.Scene();
 
 let elapsedTime = 0;
 let lastFrameTime = 0;
+
+const mouse = new THREE.Vector2();
 
 const canvas = /** @type {HTMLCanvasElement} */ (
   document.querySelector('canvas.webgl')
@@ -43,6 +46,33 @@ scene.add(explosionLayer.mesh);
 
 document.addEventListener('DOMContentLoaded', () => {
   animateTextElements(menuLayer);
+
+  const menuButtons = /** @type {NodeListOf<HTMLButtonElement>} */ (
+    document.querySelectorAll('[data-menu-button]')
+  );
+  // add timeout id type using jsdoc
+  /** @type {resultOf<setTimeout>} */
+  let timeoutId = null;
+  menuButtons.forEach((button) => {
+    button.addEventListener('click', () => {
+      clearTimeout(timeoutId);
+      gsap.to(menuLayer.mesh.material.uniforms.u_inflate, {
+        value: 2,
+        duration: 0.25,
+        ease: 'power3.out',
+        overwrite: true,
+      });
+      // eslint-disable-next-line max-nested-callbacks
+      timeoutId = setTimeout(() => {
+        gsap.to(menuLayer.mesh.material.uniforms.u_inflate, {
+          value: 0,
+          duration: 0.7,
+          ease: 'sine.in',
+          overwrite: true,
+        });
+      }, 220);
+    });
+  });
 });
 
 const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
@@ -84,12 +114,16 @@ if ('ontouchstart' in window) {
 
 /** @param {MouseEvent} _event */
 function handleMouseMove(_event) {
-  // pass
+  mouse.x = _event.clientX;
+  mouse.y = _event.clientY;
 }
 
 /** @param {TouchEvent} _event */
 function handleTouchMove(_event) {
-  // pass
+  mouse.x =
+    (_event.touches[0].clientX / env.viewportResolution.value.width) * 2 - 1;
+  mouse.y =
+    -(_event.touches[0].clientY / env.viewportResolution.value.height) * 2 + 1;
 }
 
 animate();
@@ -119,6 +153,8 @@ function animate() {
   lastFrameTime = clock.getElapsedTime();
 
   menuLayer.mesh.material.uniforms.u_time.value = elapsedTime;
+  menuLayer.mesh.material.uniforms.u_mouse.value = mouse;
+
   landscapeLayer.mesh.material.uniforms.u_time.value = elapsedTime;
   cityLayer.mesh.material.uniforms.u_time.value = elapsedTime;
 

@@ -6,6 +6,9 @@ varying vec2 v_uv;
 uniform float u_time;
 uniform sampler2D u_texture;
 uniform float u_opacity;
+uniform vec2 u_mouse;
+uniform vec2 u_resolution;
+uniform float u_inflate;
 
 float random(vec2 st) {
   return fract(sin(dot(st.xy, vec2(12.9898, 78.233))) * 43758.5453123);
@@ -68,15 +71,24 @@ void main() {
   // set texture
   vec2 uv = v_uv;
 
+  float acceleration = 0.1 * u_inflate;
+  // if mouse is closer to right part of the viewport, accelerate (u_mouse is eventX, eventY, and u_resolution is width and height of canvas)
+  if (u_mouse.x > u_resolution.x / 2.0) {
+    // gradually increase acceleration
+  }
+  acceleration =
+    acceleration +
+    0.3 * (u_mouse.x - u_resolution.x / 2.0) / (u_resolution.x / 2.0);
+
   // make waves
-  float wave = sin(uv.y * 5.0 + u_time * 0.03) * 0.1;
+  float wave = sin(uv.y * 5.0 + u_time * 0.03) * 0.1 * acceleration;
 
   // add noise
-  float noise2 = cnoise(uv * 20.0 + u_time * 0.5);
+  float noise2 = cnoise(uv * 20.0 + u_time * 0.5 * 1.0 + acceleration * 2.0);
   uv.y += wave + noise2 * 0.005;
 
   float cloud = cnoise(uv * 0.1 + u_time * 0.01);
-  uv.x += cloud * 0.1 + noise2 * 0.01;
+  uv.x += cloud * 0.1 + noise2 * 0.01 + acceleration * 0.1;
 
   // rotate using noise
   float noise = cnoise(uv * 0.01 + u_time * 0.01);

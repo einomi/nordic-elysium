@@ -17,12 +17,14 @@
 
       </span>
     </h1>
-    <ul class="absolute right-[5vw] top-1/2 lg:top-[30vh] -translate-y-1/2 lg:translate-y-0 uppercase text-[4vw] lg:text-[2.5vw] text-[#333] font-medium text-right select-none">
+    <ul class="absolute right-[5vw] top-1/2 lg:top-[30vh] -translate-y-1/2 lg:translate-y-0 text-[4vw] lg:text-[2.5vw] text-[#333] text-right select-none">
       {% for item in items %}
         <li class="mb-[0.4em] opacity-0 invisible" data-list-item>
-          <a href="#" class="hover:text-[#ffdca4] active:text-[#eee]">
+          <button href="#"
+            class="hover:text-[#ffdca4] active:text-[#eee] uppercase font-medium"
+            data-menu-button>
             {{ item }}
-          </a>
+          </button>
         </li>
       {% endfor %}
     </ul>
