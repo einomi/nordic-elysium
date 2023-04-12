@@ -51,8 +51,8 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('[data-menu-button]')
   );
   // add timeout id type using jsdoc
-  /** @type {resultOf<setTimeout>} */
-  let timeoutId = null;
+  /** @type {ReturnType<typeof setTimeout>} */
+  let timeoutId;
   let multiplier = 0;
   menuButtons.forEach((button) => {
     button.addEventListener('click', () => {
