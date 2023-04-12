@@ -1,6 +1,3 @@
-![frontenso-eleventy-starter](./src/images/frontenso-11ty-starter.png 'Title')</br>
-_by_ **[frontenso.com](https://frontenso.com)**
-
 # Nordic Elysium Tech Demo
 
 A tech demo written with WebGL and GSAP.
