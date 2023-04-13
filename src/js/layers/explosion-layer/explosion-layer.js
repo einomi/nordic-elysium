@@ -60,7 +60,7 @@ class ExplosionLayer extends Layer {
   }
 
   getInitialScale() {
-    return env.isPortrait ? 2.0 : 1.5;
+    return env.isPortrait ? 3.0 : 1.5;
   }
 
   setScale() {
@@ -68,11 +68,13 @@ class ExplosionLayer extends Layer {
   }
 
   setPositionY() {
+    const moveFactor = env.isPortrait ? -0.2 : 0.07;
+
     this.initialY =
       this.height / 2 -
       env.viewportResolution.value.height / 2 +
       this.cityLayer.height -
-      env.viewportResolution.value.width * 0.07;
+      env.viewportResolution.value.width * moveFactor;
     this.mesh.position.y = this.initialY;
   }
 

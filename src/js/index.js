@@ -158,7 +158,6 @@ eventEmitter.on('envUpdated', () => {
 
   updateCamera();
 
-  cityLayer.mesh.material.uniforms.u_resolution = env.viewportResolution;
   eventEmitter.emit('updateLayers');
 });
 
@@ -186,25 +185,22 @@ function animate() {
       smokeLayer.positionZ + (1 + Math.sin(elapsedTime * 0.1)) * 30;
   });
 
-  treesLayer.mesh.position.x = -Math.sin(elapsedTime * 0.1) * 20;
+  treesLayer.mesh.position.x = -Math.sin(elapsedTime * 0.2) * 20;
 
-  cityLayer.mesh.position.x = Math.sin(elapsedTime * 0.075) * 40;
-
+  const cityPeriod = 0.07;
+  cityLayer.mesh.position.x = Math.sin(elapsedTime * cityPeriod) * 50;
+  const cityScaleTo =
+    cityLayer.initialScale + Math.sin(elapsedTime * cityPeriod) * 0.1;
   // animate city scale
-  cityLayer.mesh.scale.set(
-    cityLayer.initialScale + Math.sin(elapsedTime * 0.1) * 0.05,
-    cityLayer.initialScale + Math.sin(elapsedTime * 0.1) * 0.05,
-    1
-  );
+  cityLayer.mesh.scale.set(cityScaleTo, cityScaleTo, 1);
 
-  explosionLayer.mesh.position.x = Math.sin(elapsedTime * 0.01) * 20;
+  explosionLayer.mesh.position.x = -Math.sin(elapsedTime * 0.03) * 30;
+  const explosionPeriod = 0.1;
   explosionLayer.mesh.position.y =
-    explosionLayer.initialY + Math.sin(elapsedTime * 0.15) * 10;
-  explosionLayer.mesh.scale.set(
-    explosionLayer.initialScale + Math.sin(elapsedTime * 0.15) * 0.12,
-    explosionLayer.initialScale + Math.sin(elapsedTime * 0.15) * 0.12,
-    1
-  );
+    explosionLayer.initialY + Math.sin(elapsedTime * explosionPeriod) * 25;
+  const explosionScaleTo =
+    explosionLayer.initialScale + Math.sin(elapsedTime * explosionPeriod) * 0.1;
+  explosionLayer.mesh.scale.set(explosionScaleTo, explosionScaleTo, 1);
 
   renderer.render(scene, camera);
 }

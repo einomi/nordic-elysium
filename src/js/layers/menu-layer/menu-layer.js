@@ -47,10 +47,9 @@ class MenuLayer extends Layer {
   }
 
   getGeometry() {
-    const isPortrait =
-      env.viewportResolution.value.height > env.viewportResolution.value.width;
+    const isPortrait = env.isPortrait;
     const width = isPortrait
-      ? env.viewportResolution.value.width
+      ? env.viewportResolution.value.width * 1.5
       : env.viewportResolution.value.width / 1.5;
     const height = width / this.aspect;
 
@@ -58,7 +57,9 @@ class MenuLayer extends Layer {
 
     // change position of plane to right side
     geometry.translate(
-      env.viewportResolution.value.width / 5,
+      isPortrait
+        ? -env.viewportResolution.value.width / 5
+        : env.viewportResolution.value.width / 5,
       env.viewportResolution.value.height / 12,
       0
     );

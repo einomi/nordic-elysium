@@ -4,7 +4,9 @@
 varying vec2 v_uv;
 uniform float u_time;
 uniform sampler2D u_texture;
-uniform sampler2D u_mask;
+uniform vec2 u_resolution;
+uniform float u_texture_width;
+uniform float u_texture_height;
 
 float random(vec2 st) {
   return fract(sin(dot(st.xy, vec2(12.9898, 78.233))) * 43758.5453123);
@@ -62,8 +64,20 @@ void main() {
   vec2 mid = vec2(0.5, 0.5);
   vec4 tex = texture2D(u_texture, uv);
 
-  // get mask
-  vec4 mask = texture2D(u_mask, uv);
+  float aspect = u_resolution.x / u_resolution.y;
+
+  // make tex background size cover, centered
+  float scale = max(
+    u_texture_width / u_resolution.x,
+    u_texture_height / u_resolution.y
+  );
+  float scaledWidth = u_texture_width;
+  float scaledHeight = u_texture_height;
+  float offsetX = (u_resolution.x - scaledWidth) / 2.0;
+  float offsetY = (u_resolution.y - scaledHeight) / 2.0;
+  uv =
+    (uv * u_resolution - vec2(offsetX, offsetY)) /
+    vec2(scaledWidth, scaledHeight);
 
   // apply ray animation to the masked area of tex
   // add water noise
@@ -76,7 +90,6 @@ void main() {
     cnoise(uv * 100.0 * uv.x - u_time * 0.5) * 0.1;
 
   float x = uv.x + noise1 * 0.001 + noise2 * 0.001;
-
   float y = uv.y + noise1 * 0.01 - noise2 * 0.01 + noise3 * 0.1;
 
   // get new uv

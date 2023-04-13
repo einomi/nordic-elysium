@@ -60,8 +60,6 @@ float cnoise1d(float x) {
 void main() {
   vec2 uv = v_uv;
 
-  float scaleAspect = u_resolution.x < u_resolution.y ? 1.5 : 1.0;
-
   vec4 river_mask = texture2D(u_river_mask, uv);
   float river_mask_value = river_mask.r;
 

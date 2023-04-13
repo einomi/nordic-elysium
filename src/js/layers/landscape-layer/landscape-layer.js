@@ -12,15 +12,14 @@ class LandscapeLayer extends Layer {
   constructor() {
     super();
 
-    const maskTexture = textureLoader.load('/mask.png');
-
     const uniformsBackground = {
       u_texture: { value: textureLoader.load('/scenery.jpg') },
-      u_mask: { value: maskTexture },
       u_time: { value: 0.0 },
       u_resolution: env.viewportResolution,
       u_mouse: { value: { x: 0.0, y: 0.0 } },
       u_duration: { value: 8.0 },
+      u_texture_width: { value: 2136 },
+      u_texture_height: { value: 1113 },
     };
 
     const material = new THREE.ShaderMaterial({

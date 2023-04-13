@@ -62,11 +62,15 @@ class CityLayer extends Layer {
 
     this.mesh.position.z = 1;
 
-    this.initialScale = 1.2;
+    this.initialScale = this.getInitialScale();
 
     this.mesh.scale.set(this.initialScale, this.initialScale, 1);
 
     this.moveToBottom();
+  }
+
+  getInitialScale() {
+    return env.isPortrait ? 3 : 1.2;
   }
 
   getHeight() {
@@ -101,6 +105,7 @@ class CityLayer extends Layer {
   }
 
   update() {
+    this.initialScale = this.getInitialScale();
     this.updateHeight();
     super.update();
     this.moveToBottom();
