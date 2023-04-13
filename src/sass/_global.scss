@@ -9,6 +9,11 @@
   transition: none;
 }
 
+html,
+body {
+  background-color: #09342f;
+}
+
 body {
   @include font-family-sans;
 }
