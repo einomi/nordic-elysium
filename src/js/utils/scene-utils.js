@@ -12,6 +12,11 @@ const loaderTextEl = document.querySelector('[data-loader-text]');
 const isLoaderHidden = process.env.IS_LOADER_HIDDEN === 'true';
 
 /**
+ * @type {ResultOf<typeof setTimeout>}
+ *  */
+let blinkingTimeoutId = null;
+
+/**
  * @param {string} url
  * @param {number} itemsLoaded
  * @param {number} itemsTotal
@@ -20,6 +25,8 @@ manager.onProgress = function (url, itemsLoaded, itemsTotal) {
   if (isLoaderHidden) {
     return;
   }
+
+  clearTimeout(blinkingTimeoutId);
 
   gsap.to(loaderTextEl, {
     duration: 0.25,
@@ -40,6 +47,17 @@ manager.onProgress = function (url, itemsLoaded, itemsTotal) {
     delay: 0.15,
     ease: 'sine.out',
   });
+
+  blinkingTimeoutId = setTimeout(() => {
+    gsap.to(loaderTextEl, {
+      duration: 1,
+      autoAlpha: 0,
+      ease: 'linear',
+      repeat: -1,
+      yoyo: true,
+    });
+  }, 1000);
+
   loaderTextEl.innerHTML = message;
 };
 
@@ -47,6 +65,8 @@ manager.onLoad = function () {
   if (isLoaderHidden) {
     return;
   }
+
+  clearTimeout(blinkingTimeoutId);
 
   gsap.to(loaderTextEl, { alpha: 0, duration: 0.35, overwrite: true });
   gsap.to(loaderEl, {
