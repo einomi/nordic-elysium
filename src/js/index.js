@@ -10,6 +10,7 @@ import LandscapeLayer from './layers/landscape-layer/landscape-layer';
 import { animateTextElements } from './modules/text-animation';
 import { env } from './env';
 import eventEmitter from './event-emitter';
+import { throttle } from './utils/throttle';
 
 const scene = new THREE.Scene();
 
@@ -113,24 +114,36 @@ renderer.setSize(
 
 const clock = new THREE.Clock();
 
+const mouseThrottlingDelay = 3;
 if ('ontouchstart' in window) {
-  document.addEventListener('touchmove', handleTouchMove);
+  document.addEventListener(
+    'touchmove',
+    throttle(handleTouchMove, mouseThrottlingDelay)
+  );
 } else {
-  document.addEventListener('mousemove', handleMouseMove);
+  document.addEventListener(
+    'mousemove',
+    throttle(handleMouseMove, mouseThrottlingDelay)
+  );
 }
 
-/** @param {MouseEvent} _event */
-function handleMouseMove(_event) {
-  mouse.x = _event.clientX;
-  mouse.y = _event.clientY;
+/**
+ * @param {number} nextVal
+ *  */
+function getLerpedMousePosition(nextVal) {
+  return THREE.MathUtils.lerp(mouse.x, nextVal, 0.03);
+}
+
+/** @param {MouseEvent} event */
+function handleMouseMove(event) {
+  mouse.x = getLerpedMousePosition(event.clientX);
+  mouse.y = getLerpedMousePosition(event.clientY);
 }
 
 /** @param {TouchEvent} _event */
 function handleTouchMove(_event) {
-  mouse.x =
-    (_event.touches[0].clientX / env.viewportResolution.value.width) * 2 - 1;
-  mouse.y =
-    -(_event.touches[0].clientY / env.viewportResolution.value.height) * 2 + 1;
+  mouse.x = getLerpedMousePosition(_event.touches[0].clientX);
+  mouse.y = getLerpedMousePosition(_event.touches[0].clientY);
 }
 
 eventEmitter.on('envUpdated', () => {

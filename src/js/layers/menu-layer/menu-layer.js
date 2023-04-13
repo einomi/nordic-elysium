@@ -18,6 +18,8 @@ class MenuLayer extends Layer {
       value: 0,
     };
 
+    this.aspect = 815 / 1076;
+
     this.geometry = this.getGeometry();
 
     // eslint-disable-next-line sonarjs/prefer-object-literal
@@ -50,9 +52,7 @@ class MenuLayer extends Layer {
     const width = isPortrait
       ? env.viewportResolution.value.width
       : env.viewportResolution.value.width / 1.5;
-    const height = isPortrait
-      ? env.viewportResolution.value.height / 1.5
-      : env.viewportResolution.value.height + 100;
+    const height = width / this.aspect;
 
     const geometry = new THREE.PlaneGeometry(width, height);
 
@@ -65,10 +65,6 @@ class MenuLayer extends Layer {
 
     return geometry;
   }
-
-  // update() {
-  //   super.update();
-  // }
 }
 
 export default MenuLayer;

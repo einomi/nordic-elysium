@@ -72,13 +72,11 @@ void main() {
   vec2 uv = v_uv;
 
   float acceleration = 0.1 * u_inflate;
+
   // if mouse is closer to right part of the viewport, accelerate (u_mouse is eventX, eventY, and u_resolution is width and height of canvas)
-  if (u_mouse.x > u_resolution.x / 2.0) {
-    // gradually increase acceleration
-  }
   acceleration =
     acceleration +
-    0.3 * (u_mouse.x - u_resolution.x / 2.0) / (u_resolution.x / 2.0);
+    0.07 * (u_mouse.x - u_resolution.x / 2.0) / (u_resolution.x / 2.0);
 
   // make waves
   float wave = sin(uv.y * 5.0 + u_time * 0.03) * 0.1 * acceleration;
