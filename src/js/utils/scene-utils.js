@@ -62,7 +62,9 @@ manager.onLoad = function () {
 
 if (isLoaderHidden) {
   gsap.set(loaderEl, { autoAlpha: 0 });
-  eventEmitter.emit('loader:hide');
+  setTimeout(() => {
+    eventEmitter.emit('loader:hide');
+  });
 }
 
 export const textureLoader = new THREE.TextureLoader(manager);

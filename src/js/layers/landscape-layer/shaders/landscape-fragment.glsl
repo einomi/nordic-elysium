@@ -10,13 +10,6 @@ float random(vec2 st) {
   return fract(sin(dot(st.xy, vec2(12.9898, 78.233))) * 43758.5453123);
 }
 
-vec2 rotate(vec2 uv, float rotation, vec2 mid) {
-  return vec2(
-    cos(rotation) * (uv.x - mid.x) + sin(rotation) * (uv.y - mid.y) + mid.x,
-    cos(rotation) * (uv.y - mid.y) - sin(rotation) * (uv.x - mid.x) + mid.y
-  );
-}
-
 //	Classic Perlin 2D Noise
 //	by Stefan Gustavson
 //
@@ -69,38 +62,35 @@ void main() {
   vec2 mid = vec2(0.5, 0.5);
   vec4 tex = texture2D(u_texture, uv);
 
-  //  if (uv.y < 0.1) {
-  //    discard;
-  //  }
-
   // get mask
   vec4 mask = texture2D(u_mask, uv);
 
   // apply ray animation to the masked area of tex
   // add water noise
-  float noise = cnoise(vec2(uv.x) * 0.3 - u_time * 0.1);
-  float noise2 = cnoise(uv * 50.0 - u_time * 0.4);
+  float noise1 = cnoise(vec2(uv.x) * 0.3 - u_time * 0.1);
+  float noise2 = cnoise(uv * 10.0 - u_time * 0.1);
 
-  // get ray of light
-  float ray =
-    cnoise(vec2(uv.x * 0.01 - u_time * 0.1, uv.x * 1.0 - u_time * 0.1)) * 0.5 +
-    0.5;
+  // add jagged wave noise
+  float noise3 =
+    cnoise(uv * 10.0 - u_time * 0.1) * 0.5 +
+    cnoise(uv * 100.0 * uv.x - u_time * 0.5) * 0.1;
 
-  float x = uv.x * ray;
+  float x = uv.x + noise1 * 0.001 + noise2 * 0.001;
 
-  // add noise
-
-  // move y up continuously
-  float y = uv.y - noise * 0.1 - noise2 * 0.05;
+  float y = uv.y + noise1 * 0.01 - noise2 * 0.01 + noise3 * 0.1;
 
   // get new uv
-  vec2 newUv = vec2(uv.x, y);
+  vec2 newUv = vec2(x, y);
 
   float brightness = 1.3;
 
   // get new tex
   tex = texture2D(u_texture, newUv);
   vec3 color = vec3(tex.r * 0.4, tex.g * 1.0, tex.b * 0.9);
+  vec3 color2 = vec3(tex.r * 0.4, tex.g * 0.4, tex.b * 0.9);
+
+  color = mix(color, color2, (uv.y - 0.5) * 2.0);
+
   gl_FragColor = vec4(color * brightness, 1.0);
 
 }
