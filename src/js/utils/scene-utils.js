@@ -1,10 +1,15 @@
 import * as THREE from 'three';
 import gsap from 'gsap';
 
+import eventEmitter from '../event-emitter';
+
 const manager = new THREE.LoadingManager();
 
 const loaderEl = document.querySelector('[data-loader]');
 const loaderTextEl = document.querySelector('[data-loader-text]');
+
+// eslint-disable-next-line no-undef
+const isLoaderHidden = process.env.IS_LOADER_HIDDEN === 'true';
 
 /**
  * @param {string} url
@@ -12,6 +17,10 @@ const loaderTextEl = document.querySelector('[data-loader-text]');
  * @param {number} itemsTotal
  *  */
 manager.onProgress = function (url, itemsLoaded, itemsTotal) {
+  if (isLoaderHidden) {
+    return;
+  }
+
   gsap.to(loaderTextEl, {
     duration: 0.25,
     alpha: 0,
@@ -35,6 +44,10 @@ manager.onProgress = function (url, itemsLoaded, itemsTotal) {
 };
 
 manager.onLoad = function () {
+  if (isLoaderHidden) {
+    return;
+  }
+
   gsap.to(loaderTextEl, { alpha: 0, duration: 0.35, overwrite: true });
   gsap.to(loaderEl, {
     duration: 1.4,
@@ -43,6 +56,13 @@ manager.onLoad = function () {
     delay: 0.2,
     overwrite: true,
   });
+
+  eventEmitter.emit('loader:hide');
 };
+
+if (isLoaderHidden) {
+  gsap.set(loaderEl, { autoAlpha: 0 });
+  eventEmitter.emit('loader:hide');
+}
 
 export const textureLoader = new THREE.TextureLoader(manager);

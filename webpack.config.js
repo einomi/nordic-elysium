@@ -1,5 +1,8 @@
 'use strict';
+require('dotenv').config();
 const path = require('path');
+
+const webpack = require('webpack');
 
 const IS_PRODUCTION = require('./env').IS_PRODUCTION;
 
@@ -34,4 +37,5 @@ module.exports = {
   optimization: {
     minimize: IS_PRODUCTION,
   },
+  plugins: [new webpack.EnvironmentPlugin(['IS_LOADER_HIDDEN'])],
 };

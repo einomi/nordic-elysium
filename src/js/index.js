@@ -45,9 +45,13 @@ const explosionLayer = new ExplosionLayer({ cityLayer });
 scene.add(explosionLayer.mesh);
 /***** END LAYERS INIT *****/
 
-document.addEventListener('DOMContentLoaded', () => {
-  animateTextElements(menuLayer);
+eventEmitter.on('loader:hide', () => {
+  setTimeout(() => {
+    animateTextElements(menuLayer);
+  }, 350);
+});
 
+document.addEventListener('DOMContentLoaded', () => {
   const menuButtons = /** @type {NodeListOf<HTMLButtonElement>} */ (
     document.querySelectorAll('[data-menu-button]')
   );
