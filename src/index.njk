@@ -6,7 +6,7 @@
   <div class="w-full overflow-hidden">
     <canvas class="fixed webgl" data-canvas></canvas>
 
-    <h1 class="absolute left-1/2 landscape:left-[5vw] bottom-[11vw] landscape:bottom-[3vw] uppercase text-[#eee] text-[6vw] landscape:text-[3.6vw] tracking-[0.07em] font-bold select-none"
+    <h1 class="absolute left-1/2 landscape:left-[5vw] bottom-[11vw] landscape:bottom-[3vw] uppercase text-[#eee] text-[6vw] landscape:text-[3vw] tracking-[0.07em] font-bold select-none"
       data-title>
       <span class="opacity-0" data-source>Nordic Elysium</span>
       <span class="opacity-0 absolute left-0 whitespace-nowrap -translate-x-[55%] landscape:translate-x-0"
@@ -15,11 +15,11 @@
 
       </span>
     </h1>
-    <ul class="absolute right-[8vw] landscape:right-[5vw] top-[42%] landscape:top-[30%] -translate-y-1/2 landscape:translate-y-0 text-[5.5vw] landscape:text-[2.5vw] text-[#333] text-right select-none">
+    <ul class="absolute right-[8vw] landscape:right-[5vw] top-[42%] landscape:top-[30%] -translate-y-1/2 landscape:translate-y-0 text-[6vw] landscape:text-[2vw] landscape:text-[2.5vw] text-[#333] text-right select-none space-y-[0.3em]">
       {% for item in items %}
-        <li class="mb-[0.4em] opacity-0 invisible" data-list-item>
+        <li class="opacity-0 invisible" data-list-item>
           <button href="#"
-            class="hover:text-[#ffdca4] active:text-[#eee] uppercase font-medium"
+            class="hover:text-[#ffdca4] active:text-[#eee] uppercase font-bold"
             data-menu-button>
             {{ item }}
           </button>
