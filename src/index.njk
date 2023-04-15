@@ -5,7 +5,6 @@
 
   <div class="w-full overflow-hidden">
     <canvas class="fixed webgl" data-canvas></canvas>
-
     <h1 class="absolute left-1/2 landscape:left-[5vw] bottom-[11vw] landscape:bottom-[3vw] uppercase text-[#eee] text-[6vw] landscape:text-[3vw] tracking-[0.07em] font-bold select-none"
       data-title>
       <span class="opacity-0" data-source>Nordic Elysium</span>
@@ -19,7 +18,7 @@
       {% for item in items %}
         <li class="opacity-0 invisible" data-list-item>
           <button href="#"
-            class="hover:text-[#ffdca4] active:text-[#eee] uppercase font-bold"
+            class="hover:text-[#ffdca4] focus-visible:text-[#ffdca4] focus:outline-none active:text-[#eee] uppercase font-bold"
             data-menu-button>
             {{ item }}
           </button>
