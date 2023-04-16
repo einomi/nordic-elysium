@@ -2,8 +2,8 @@ import * as THREE from 'three';
 
 import { Layer } from '../layer';
 import { textureLoader } from '../../utils/scene-utils';
-import { env } from '../../env';
 import eventEmitter from '../../event-emitter';
+import { env } from '../../env';
 
 /** @extends {Layer<THREE.MeshBasicMaterial>} */
 class ExplosionLayer extends Layer {
@@ -14,7 +14,9 @@ class ExplosionLayer extends Layer {
     this.cityLayer = cityLayer;
     this.initialY = 0;
 
-    const explosionTexture = textureLoader.load('/explosion.png');
+    const explosionTexture = textureLoader.load(
+      env.getFileNameWithModernImageFormat('/explosion.png')
+    );
 
     this.height = this.getHeight();
     this.geometry = this.getGeometry();

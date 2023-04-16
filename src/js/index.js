@@ -41,8 +41,12 @@ scene.add(treesLayer.mesh);
 const cityLayer = new CityLayer();
 scene.add(cityLayer.mesh);
 
-const explosionLayer = new ExplosionLayer({ cityLayer });
-scene.add(explosionLayer.mesh);
+/** @type {ExplosionLayer | null} */
+let explosionLayer = null;
+eventEmitter.on('imageFormatsSupportDetected', () => {
+  explosionLayer = new ExplosionLayer({ cityLayer });
+  scene.add(explosionLayer.mesh);
+});
 /***** END LAYERS INIT *****/
 
 eventEmitter.on('loader:hide', () => {
@@ -194,13 +198,16 @@ function animate() {
   // animate city scale
   cityLayer.mesh.scale.set(cityScaleTo, cityScaleTo, 1);
 
-  explosionLayer.mesh.position.x = -Math.sin(elapsedTime * 0.03) * 30;
-  const explosionPeriod = 0.1;
-  explosionLayer.mesh.position.y =
-    explosionLayer.initialY + Math.sin(elapsedTime * explosionPeriod) * 25;
-  const explosionScaleTo =
-    explosionLayer.initialScale + Math.sin(elapsedTime * explosionPeriod) * 0.1;
-  explosionLayer.mesh.scale.set(explosionScaleTo, explosionScaleTo, 1);
+  if (explosionLayer) {
+    explosionLayer.mesh.position.x = -Math.sin(elapsedTime * 0.03) * 30;
+    const explosionPeriod = 0.1;
+    explosionLayer.mesh.position.y =
+      explosionLayer.initialY + Math.sin(elapsedTime * explosionPeriod) * 25;
+    const explosionScaleTo =
+      explosionLayer.initialScale +
+      Math.sin(elapsedTime * explosionPeriod) * 0.1;
+    explosionLayer.mesh.scale.set(explosionScaleTo, explosionScaleTo, 1);
+  }
 
   renderer.render(scene, camera);
 }
