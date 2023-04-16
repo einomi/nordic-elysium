@@ -9,7 +9,9 @@ class TreesLayer extends Layer {
   constructor() {
     super();
 
-    const treesTexture = textureLoader.load('/trees.png');
+    const treesTexture = textureLoader.load(
+      env.getFileNameWithModernImageFormat('/trees.png')
+    );
 
     this.geometry = new THREE.PlaneGeometry(
       env.viewportResolution.value.width,

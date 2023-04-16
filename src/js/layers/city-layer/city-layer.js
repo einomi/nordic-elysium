@@ -27,7 +27,9 @@ class CityLayer extends Layer {
   constructor() {
     super();
 
-    const cityTexture = textureLoader.load('/city.png');
+    const cityTexture = textureLoader.load(
+      env.getFileNameWithModernImageFormat('/city.png')
+    );
     this.cityAspectRatio = 2136 / 688;
 
     this.height = -1;

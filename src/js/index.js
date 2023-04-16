@@ -35,15 +35,22 @@ smokeLayer.meshes.forEach((mesh) => {
   scene.add(mesh);
 });
 
-const treesLayer = new TreesLayer();
-scene.add(treesLayer.mesh);
+/** @type {TreesLayer | null} */
+let treesLayer = null;
 
-const cityLayer = new CityLayer();
-scene.add(cityLayer.mesh);
+/** @type {CityLayer | null} */
+let cityLayer = null;
 
 /** @type {ExplosionLayer | null} */
 let explosionLayer = null;
+
 eventEmitter.on('imageFormatsSupportDetected', () => {
+  treesLayer = new TreesLayer();
+  scene.add(treesLayer.mesh);
+
+  cityLayer = new CityLayer();
+  scene.add(cityLayer.mesh);
+
   explosionLayer = new ExplosionLayer({ cityLayer });
   scene.add(explosionLayer.mesh);
 });
@@ -181,7 +188,6 @@ function animate() {
   menuLayer.mesh.material.uniforms.u_mouse.value = mouse;
 
   landscapeLayer.mesh.material.uniforms.u_time.value = elapsedTime;
-  cityLayer.mesh.material.uniforms.u_time.value = elapsedTime;
 
   smokeLayer.meshes.forEach((mesh, index) => {
     mesh.rotation.z = elapsedTime * 0.08 + index * 0.5;
@@ -189,14 +195,19 @@ function animate() {
       smokeLayer.positionZ + (1 + Math.sin(elapsedTime * 0.1)) * 30;
   });
 
-  treesLayer.mesh.position.x = -Math.sin(elapsedTime * 0.2) * 20;
+  if (treesLayer) {
+    treesLayer.mesh.position.x = -Math.sin(elapsedTime * 0.2) * 20;
+  }
 
-  const cityPeriod = 0.07;
-  cityLayer.mesh.position.x = Math.sin(elapsedTime * cityPeriod) * 50;
-  const cityScaleTo =
-    cityLayer.initialScale + Math.sin(elapsedTime * cityPeriod) * 0.1;
-  // animate city scale
-  cityLayer.mesh.scale.set(cityScaleTo, cityScaleTo, 1);
+  if (cityLayer) {
+    cityLayer.mesh.material.uniforms.u_time.value = elapsedTime;
+    const cityPeriod = 0.07;
+    cityLayer.mesh.position.x = Math.sin(elapsedTime * cityPeriod) * 50;
+    const cityScaleTo =
+      cityLayer.initialScale + Math.sin(elapsedTime * cityPeriod) * 0.1;
+    // animate city scale
+    cityLayer.mesh.scale.set(cityScaleTo, cityScaleTo, 1);
+  }
 
   if (explosionLayer) {
     explosionLayer.mesh.position.x = -Math.sin(elapsedTime * 0.03) * 30;
