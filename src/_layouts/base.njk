@@ -1,24 +1,27 @@
+{% set TITLE = 'Nordic Elysium' %}
+{% set DESCRIPTION = 'Tech demo featuring Three.js and GSAP' %}
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
     <title>
-      Nordic Elysium
+      {{ TITLE }}
     </title>
     <meta name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
-    <meta name="description" content="Tech demo featuring Three.js and GSAP" />
+    <meta name="description" content="{{ DESCRIPTION }}" />
     <link rel="icon" href="/favicon.png" sizes="any" />
 
-    <meta property="og:title" content="Nordic Elysium" />
-    <meta property="og:description"
-      content="Tech demo featuring Three.js and GSAP" />
+    <meta property="og:title" content="{{ TITLE }}" />
+    <meta property="og:description" content="{{ DESCRIPTION }}" />
     <meta property="og:image"
       content="https://nordic-elysium-einomi.netlify.app/share.jpg" />
 
     <meta property="twitter:card" content="summary_large_image" />
     <meta property="twitter:image"
       content="https://nordic-elysium-einomi.netlify.app/share.jpg" />
+    <meta property="twitter:title" content="{{ TITLE }}" />
+    <meta property="twitter:description" content="{{ DESCRIPTION }}" />
 
     {% block stylesheets %}
       <link rel="stylesheet" href="{{ STATIC_PATH }}/css/tailwind.css" />
